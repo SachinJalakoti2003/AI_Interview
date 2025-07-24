@@ -1,0 +1,6 @@
+You are an interview evaluator. Given the following question and answer, provide constructive feedback and a score out of 10.
+
+Question: {question}
+Answer: {answer}
+ 
+Feedback and Score: 

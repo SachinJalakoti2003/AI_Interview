@@ -1,0 +1,6 @@
+Flask
+langchain
+langchain-google-genai
+google-ai-generativelanguage
+python-dotenv
+gunicorn        # For deployment on platforms like Render or Railway

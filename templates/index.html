@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Interview Coach - Practice & Excel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --secondary: #64748b;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-tertiary: #f1f5f9;
+      --bg-dark: #0f172a;
+      --bg-dark-secondary: #1e293b;
+      --bg-dark-tertiary: #334155;
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #64748b;
+      --text-dark-primary: #f8fafc;
+      --text-dark-secondary: #cbd5e1;
+      --text-dark-tertiary: #94a3b8;
+
+      --border-light: #e2e8f0;
+      --border-dark: #475569;
+
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+      --radius-2xl: 1.5rem;
+
+      --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      margin: 0;
+      transition: all var(--transition);
+      overflow-x: hidden;
+    }
+
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark-primary);
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+      z-index: -1;
+      animation: backgroundShift 20s ease-in-out infinite;
+    }
+
+    @keyframes backgroundShift {
+
+      0%,
+      100% {
+        transform: translateX(0) translateY(0);
+      }
+
+      25% {
+        transform: translateX(-20px) translateY(-10px);
+      }
+
+      50% {
+        transform: translateX(20px) translateY(10px);
+      }
+
+      75% {
+        transform: translateX(-10px) translateY(20px);
+      }
+    }
+
+    .container-fluid {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      z-index: 1000;
+    }
+
+    .theme-toggle-btn {
+      width: 3rem;
+      height: 3rem;
+      border: none;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    body.dark .theme-toggle-btn {
+      background: var(--bg-dark-secondary);
+      color: var(--text-dark-primary);
+      border-color: var(--border-dark);
+    }
+
+    .theme-toggle-btn:hover {
+      transform: scale(1.1);
+      box-shadow: var(--shadow-xl);
+    }
+
+    /* Hero Section */
+    .hero-section {
+      text-align: center;
+      margin-bottom: 4rem;
+      padding: 4rem 0;
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 1.5rem;
+      line-height: 1.1;
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 2rem;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    body.dark .hero-subtitle {
+      color: var(--text-dark-secondary);
+    }
+
+    /* Cards */
+    .main-card {
+      background: var(--bg-primary);
+      border-radius: var(--radius-2xl);
+      box-shadow: var(--shadow-xl);
+      border: 1px solid var(--border-light);
+      padding: 3rem;
+      margin-bottom: 2rem;
+      transition: all var(--transition);
+      backdrop-filter: blur(10px);
+    }
+
+    body.dark .main-card {
+      background: var(--bg-dark-secondary);
+      border-color: var(--border-dark);
+    }
+
+    .main-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Section Titles */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    body.dark .section-title {
+      color: var(--text-dark-primary);
+    }
+
+    .section-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin-bottom: 2.5rem;
+      font-weight: 500;
+    }
+
+    body.dark .section-subtitle {
+      color: var(--text-dark-secondary);
+    }
+
+    /* Form Styles */
+    .form-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--border-light);
+      transition: all var(--transition);
+    }
+
+    body.dark .form-section {
+      background: var(--bg-dark-tertiary);
+      border-color: var(--border-dark);
+    }
+
+    .form-floating {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .form-floating>.form-control,
+    .form-floating>.form-select {
+      height: 4rem;
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      font-size: 1.125rem;
+      font-weight: 500;
+      transition: all var(--transition);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 1.5rem 1rem 0.5rem;
+    }
+
+    body.dark .form-floating>.form-control,
+    body.dark .form-floating>.form-select {
+      background: var(--bg-dark-secondary);
+      border-color: var(--border-dark);
+      color: var(--text-dark-primary);
+    }
+
+    .form-floating>.form-control:focus,
+    .form-floating>.form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      outline: none;
+    }
+
+    .form-floating>label {
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 1rem;
+    }
+
+    body.dark .form-floating>label {
+      color: var(--text-dark-secondary);
+    }
+
+    .helper-text {
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+      margin-top: 0.5rem;
+      font-weight: 500;
+    }
+
+    body.dark .helper-text {
+      color: var(--text-dark-tertiary);
+    }
+
+    /* Buttons */
+    .btn-primary-custom {
+      background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 1rem 2.5rem;
+      border-radius: var(--radius-lg);
+      font-size: 1.125rem;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-primary-custom::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+      color: white;
+    }
+
+    .btn-primary-custom:hover::before {
+      left: 100%;
+    }
+
+    .btn-outline-custom {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+      font-weight: 600;
+      padding: 1rem 2.5rem;
+      border-radius: var(--radius-lg);
+      transition: all var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .btn-outline-custom:hover {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+      text-decoration: none;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      display: none;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Questions Section */
+    .questions-section {
+      margin-top: 4rem;
+    }
+
+    .progress-section {
+      background: var(--bg-secondary);
+      border-radius: var(--radius-xl);
+      padding: 2rem;
+      margin-bottom: 3rem;
+      border: 1px solid var(--border-light);
+    }
+
+    body.dark .progress-section {
+      background: var(--bg-dark-tertiary);
+      border-color: var(--border-dark);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .progress-title {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    body.dark .progress-title {
+      color: var(--text-dark-primary);
+    }
+
+    .progress-stats {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    body.dark .progress-stats {
+      color: var(--text-dark-secondary);
+    }
+
+    .progress {
+      height: 1rem;
+      border-radius: var(--radius-md);
+      background: var(--border-light);
+      overflow: hidden;
+      position: relative;
+    }
+
+    body.dark .progress {
+      background: var(--border-dark);
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, var(--primary), #8b5cf6);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-image: linear-gradient(-45deg,
+          rgba(255, 255, 255, 0.2) 25%,
+          transparent 25%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.2) 50%,
+          rgba(255, 255, 255, 0.2) 75%,
+          transparent 75%,
+          transparent);
+      background-size: 1rem 1rem;
+      animation: progressStripes 1s linear infinite;
+    }
+
+    @keyframes progressStripes {
+      0% {
+        background-position: 1rem 0;
+      }
+
+      100% {
+        background-position: 0 0;
+      }
+    }
+
+    /* Question Cards */
+    .question-card {
+      background: var(--bg-primary);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-xl);
+      margin-bottom: 2.5rem;
+      transition: all var(--transition);
+      overflow: hidden;
+      position: relative;
+    }
+
+    body.dark .question-card {
+      background: var(--bg-dark-secondary);
+      border-color: var(--border-dark);
+    }
+
+    .question-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), #8b5cf6, #06b6d4);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .question-card.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+      transform: translateY(-4px);
+    }
+
+    .question-card.active::before {
+      opacity: 1;
+    }
+
+    .question-card.completed {
+      border-color: var(--success);
+      background: rgba(5, 150, 105, 0.02);
+    }
+
+    body.dark .question-card.completed {
+      background: rgba(5, 150, 105, 0.05);
+    }
+
+    .question-header {
+      padding: 2rem 2.5rem 1.5rem;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--bg-secondary);
+    }
+
+    body.dark .question-header {
+      border-color: var(--border-dark);
+      background: var(--bg-dark-tertiary);
+    }
+
+    .question-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-right: 1rem;
+    }
+
+    .question-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      display: inline;
+    }
+
+    body.dark .question-title {
+      color: var(--text-dark-primary);
+    }
+
+    .question-text {
+      font-size: 1.125rem;
+      color: var(--text-primary);
+      line-height: 1.7;
+      margin: 1.5rem 0;
+      font-weight: 500;
+    }
+
+    body.dark .question-text {
+      color: var(--text-dark-primary);
+    }
+
+    .question-body {
+      padding: 2.5rem;
+    }
+
+    /* Answer Input */
+    .answer-input-container {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .answer-textarea {
+      width: 100%;
+      min-height: 150px;
+      padding: 1.5rem 4rem 1.5rem 1.5rem;
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      font-family: 'Inter', sans-serif;
+      font-size: 1.125rem;
+      line-height: 1.6;
+      resize: vertical;
+      transition: all var(--transition);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    body.dark .answer-textarea {
+      background: var(--bg-dark);
+      border-color: var(--border-dark);
+      color: var(--text-dark-primary);
+    }
+
+    .answer-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .answer-textarea::placeholder {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    body.dark .answer-textarea::placeholder {
+      color: var(--text-dark-tertiary);
+    }
+
+    /* Microphone Button */
+    .mic-button {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      width: 3rem;
+      height: 3rem;
+      border: none;
+      border-radius: var(--radius-lg);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all var(--transition);
+      z-index: 10;
+      border: 1px solid var(--border-light);
+    }
+
+    body.dark .mic-button {
+      background: var(--bg-dark-tertiary);
+      border-color: var(--border-dark);
+      color: var(--text-dark-secondary);
+    }
+
+    .mic-button:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+      border-color: var(--primary);
+    }
+
+    .mic-button.recording {
+      background: var(--danger);
+      color: white;
+      border-color: var(--danger);
+      animation: micPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes micPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+      }
+
+      50% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0.1);
+      }
+    }
+
+    .recording-indicator {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 14px;
+      height: 14px;
+      background: var(--danger);
+      border-radius: 50%;
+      border: 2px solid var(--bg-primary);
+      animation: recordingBlink 1s ease-in-out infinite;
+      display: none;
+    }
+
+    body.dark .recording-indicator {
+      border-color: var(--bg-dark-secondary);
+    }
+
+    .mic-button.recording .recording-indicator {
+      display: block;
+    }
+
+    @keyframes recordingBlink {
+
+      0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
+      100% {
+        opacity: 0.3;
+      }
+    }
+
+    /* Answer Stats */
+    .answer-stats {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--text-tertiary);
+    }
+
+    body.dark .answer-stats {
+      color: var(--text-dark-tertiary);
+    }
+
+    .word-count {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 500;
+    }
+
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      transition: opacity var(--transition);
+      font-weight: 500;
+    }
+
+    .typing-indicator.active {
+      opacity: 1;
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .toast-custom {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
+      backdrop-filter: blur(10px);
+    }
+
+    body.dark .toast-custom {
+      background: var(--bg-dark-secondary);
+      border-color: var(--border-dark);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .container-fluid {
+        padding: 1rem;
+      }
+
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .hero-subtitle {
+        font-size: 1.125rem;
+      }
+
+      .main-card {
+        padding: 2rem;
+      }
+
+      .form-section {
+        padding: 2rem;
+      }
+
+      .question-header,
+      .question-body {
+        padding: 2rem;
+      }
+
+      .theme-toggle {
+        top: 1rem;
+        right: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .main-card {
+        padding: 1.5rem;
+      }
+
+      .form-section {
+        padding: 1.5rem;
+      }
+
+      .question-header,
+      .question-body {
+        padding: 1.5rem;
+      }
+
+      .btn-primary-custom,
+      .btn-outline-custom {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle light/dark mode">
+      <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+    </button>
+  </div>
+
+  <div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <h1 class="hero-title">AI Interview Coach</h1>
+      <p class="hero-subtitle">Practice with AI-powered questions, get instant feedback, and ace your next interview
+        with confidence</p>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="main-card">
+      <div class="section-title">
+        <i class="bi bi-rocket-takeoff"></i>
+        Start Your Practice Session
+      </div>
+      <p class="section-subtitle">Choose your role, experience level, and topic to generate personalized interview
+        questions</p>
+
+      <div class="form-section">
+        <form method="post" id="interview-form">
+          <div class="row g-4">
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input name="role" id="role" class="form-control" placeholder="e.g. Data Scientist" required
+                  list="role-suggestions" autocomplete="off">
+                <label for="role">Job Role</label>
+                <datalist id="role-suggestions">
+                  <option value="Data Scientist">
+                  <option value="Software Engineer">
+                  <option value="Product Manager">
+                  <option value="DevOps Engineer">
+                  <option value="UI/UX Designer">
+                  <option value="Frontend Developer">
+                  <option value="Backend Developer">
+                  <option value="Full Stack Developer">
+                </datalist>
+              </div>
+              <div class="helper-text">Type or select your target role</div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <select name="level" id="level" class="form-select" required>
+                  <option value="" disabled selected>Select level</option>
+                  <option value="Intern">Intern</option>
+                  <option value="Junior">Junior (0-2 years)</option>
+                  <option value="Mid">Mid-level (2-5 years)</option>
+                  <option value="Senior">Senior (5+ years)</option>
+                  <option value="Lead">Lead/Principal</option>
+                </select>
+                <label for="level">Experience Level</label>
+              </div>
+              <div class="helper-text">Choose your experience level</div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <select name="topic" id="topic" class="form-select" required>
+                  <option value="" disabled selected>Select topic</option>
+                </select>
+                <label for="topic">Interview Topic</label>
+              </div>
+              <div class="helper-text">Topic updates based on role</div>
+            </div>
+          </div>
+
+          <div class="text-center mt-4">
+            <button type="submit" class="btn-primary-custom" id="generate-btn">
+              <i class="bi bi-magic"></i>
+              Generate Questions
+              <div class="loading-spinner" id="loading-spinner"></div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Questions Section -->
+    {% if questions %}
+    <div class="main-card questions-section">
+      <div class="progress-section">
+        <div class="progress-header">
+          <h3 class="progress-title">Your Progress</h3>
+          <div class="progress-stats" id="progress-label">0 / 0 completed</div>
+        </div>
+        <div class="progress">
+          <div class="progress-bar" id="question-progress" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="section-title">
+        <i class="bi bi-chat-square-text"></i>
+        Interview Questions
+      </div>
+      <p class="section-subtitle">Answer each question thoughtfully. You can type or use voice input for your responses.
+      </p>
+
+      <form action="/evaluate_all" method="post" id="qa-form">
+        <div id="questions-list">
+          {% for question in questions.split('\n') if question.strip() %}
+          <div class="question-card" data-question-index="{{ loop.index0 }}">
+            <div class="question-header">
+              <span class="question-number">{{ loop.index }}</span>
+              <h4 class="question-title">Question {{ loop.index }}</h4>
+            </div>
+            <div class="question-body">
+              <p class="question-text">{{ question }}</p>
+              <input type="hidden" name="question" value="{{ question }}">
+
+              <div class="answer-input-container">
+                <textarea name="answer" class="answer-textarea"
+                  placeholder="Share your thoughts here... You can type or use the microphone to speak your answer."
+                  data-question="{{ loop.index }}"></textarea>
+                <button type="button" class="mic-button" onclick="toggleDictation(this)"
+                  title="Click to start/stop voice recording">
+                  <i class="bi bi-mic-fill"></i>
+                  <div class="recording-indicator"></div>
+                </button>
+              </div>
+
+              <div class="answer-stats">
+                <div class="word-count">
+                  <i class="bi bi-pencil"></i>
+                  <span class="word-count-text">0 words</span>
+                </div>
+                <div class="typing-indicator">
+                  <i class="bi bi-three-dots"></i>
+                  <span>Typing...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="text-center mt-5">
+          <a href="/" class="btn-outline-custom me-4">
+            <i class="bi bi-arrow-left"></i>
+            Start Over
+          </a>
+          <button type="submit" class="btn-primary-custom" id="evaluate-all-btn" style="display:none;">
+            <i class="bi bi-check-circle"></i>
+            Get My Feedback
+          </button>
+        </div>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container">
+    <div id="liveToast" class="toast toast-custom" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+        <strong class="me-auto">Notification</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="toast-msg">
+        <!-- Message here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Role-Topic mapping
+    const roleTopics = {
+      'Data Scientist': ['Machine Learning', 'Statistics', 'Python', 'Data Visualization', 'Deep Learning', 'SQL', 'Big Data'],
+      'Software Engineer': ['Data Structures', 'Algorithms', 'System Design', 'OOP', 'Databases', 'JavaScript', 'React'],
+      'Product Manager': ['Product Strategy', 'Roadmapping', 'User Research', 'Agile', 'Stakeholder Management', 'Analytics'],
+      'DevOps Engineer': ['Cloud Computing', 'CI/CD', 'Containers', 'Monitoring', 'Infrastructure as Code', 'Kubernetes'],
+      'UI/UX Designer': ['Design Principles', 'Prototyping', 'User Testing', 'Figma', 'Accessibility', 'Design Systems'],
+      'Frontend Developer': ['HTML/CSS', 'JavaScript', 'React', 'Vue.js', 'Performance', 'Responsive Design'],
+      'Backend Developer': ['APIs', 'Databases', 'Node.js', 'Python', 'System Architecture', 'Security'],
+      'Full Stack Developer': ['Frontend', 'Backend', 'Databases', 'APIs', 'System Design', 'DevOps']
+    };
+
+    // Update topic options based on role
+    function updateTopicOptions() {
+      const roleInput = document.getElementById('role');
+      const topicSelect = document.getElementById('topic');
+      const role = roleInput.value.trim();
+      let topics = roleTopics[role] || ['General', 'Behavioral', 'Problem Solving', 'Technical Skills'];
+
+      topicSelect.innerHTML = '<option value="" disabled selected>Select topic</option>';
+      topics.forEach(topic => {
+        const opt = document.createElement('option');
+        opt.value = topic;
+        opt.textContent = topic;
+        topicSelect.appendChild(opt);
+      });
+
+      // Add smooth animation
+      topicSelect.style.opacity = '0.5';
+      setTimeout(() => {
+        topicSelect.style.opacity = '1';
+      }, 100);
+    }
+
+    // Progress tracking
+    function updateProgressBarAndEvalBtn() {
+      const cards = document.querySelectorAll('.question-card');
+      let answered = 0;
+
+      cards.forEach(card => {
+        const textarea = card.querySelector('textarea');
+        if (textarea && textarea.value.trim().length > 0) {
+          answered++;
+          card.classList.add('completed');
+        } else {
+          card.classList.remove('completed');
+        }
+      });
+
+      const percent = cards.length ? Math.round((answered / cards.length) * 100) : 0;
+      const progressBar = document.getElementById('question-progress');
+      const progressLabel = document.getElementById('progress-label');
+      const evalBtn = document.getElementById('evaluate-all-btn');
+
+      if (progressBar) progressBar.style.width = percent + '%';
+      if (progressLabel) progressLabel.textContent = `${answered} / ${cards.length} completed`;
+      if (evalBtn) evalBtn.style.display = (answered > 0) ? 'inline-flex' : 'none';
+    }
+
+    // Word count and typing indicators
+    function updateWordCount(textarea) {
+      const words = textarea.value.trim().split(/\s+/).filter(word => word.length > 0);
+      const wordCount = words.length;
+      const wordCountElement = textarea.closest('.question-body').querySelector('.word-count-text');
+
+      if (wordCountElement) {
+        wordCountElement.textContent = `${wordCount} word${wordCount !== 1 ? 's' : ''}`;
+      }
+    }
+
+    // Speech recognition
+    let recognitionMap = new Map();
+    let isRecordingMap = new Map();
+
+    function toggleDictation(micButton) {
+      if (!('webkitSpeechRecognition' in window)) {
+        showToast('Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.', 'warning');
+        return;
+      }
+
+      const container = micButton.parentElement;
+      const textarea = container.querySelector('textarea');
+      const isCurrentlyRecording = isRecordingMap.get(textarea) || false;
+
+      if (isCurrentlyRecording) {
+        stopRecording(micButton, textarea);
+      } else {
+        startRecording(micButton, textarea);
+      }
+    }
+
+    function startRecording(micButton, textarea) {
+      if (isRecordingMap.get(textarea)) return;
+
+      const recognition = new webkitSpeechRecognition();
+      recognition.lang = 'en-US';
+      recognition.interimResults = true;
+      recognition.continuous = true;
+      recognition.maxAlternatives = 1;
+
+      recognitionMap.set(textarea, recognition);
+      isRecordingMap.set(textarea, true);
+
+      micButton.classList.add('recording');
+      micButton.title = 'Click to stop recording';
+
+      showToast('🎤 Recording started... Speak now!', 'success');
+
+      let finalTranscript = '';
+
+      recognition.onresult = function (event) {
+        finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript + ' ';
+          }
+        }
+
+        if (finalTranscript) {
+          const currentValue = textarea.value;
+          const newValue = currentValue + (currentValue ? ' ' : '') + finalTranscript.trim();
+          textarea.value = newValue;
+          textarea.dispatchEvent(new Event('input'));
+        }
+      };
+
+      recognition.onerror = function (event) {
+        let errorMessage = 'Speech recognition error: ';
+
+        switch (event.error) {
+          case 'no-speech':
+            errorMessage += 'No speech detected. Please try again.';
+            break;
+          case 'audio-capture':
+            errorMessage += 'Microphone not accessible. Please check permissions.';
+            break;
+          case 'not-allowed':
+            errorMessage += 'Microphone access denied. Please allow microphone access.';
+            break;
+          default:
+            errorMessage += event.error;
+        }
+
+        showToast(errorMessage, 'danger');
+        stopRecording(micButton, textarea);
+      };
+
+      recognition.onend = function () {
+        if (isRecordingMap.get(textarea)) {
+          try {
+            recognition.start();
+          } catch (e) {
+            stopRecording(micButton, textarea);
+          }
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch (e) {
+        showToast('Failed to start speech recognition. Please try again.', 'danger');
+        stopRecording(micButton, textarea);
+      }
+    }
+
+    function stopRecording(micButton, textarea) {
+      const recognition = recognitionMap.get(textarea);
+
+      if (recognition) {
+        recognition.stop();
+        recognitionMap.delete(textarea);
+      }
+
+      isRecordingMap.set(textarea, false);
+
+      micButton.classList.remove('recording');
+      micButton.title = 'Click to start voice recording';
+
+      showToast('🛑 Recording stopped', 'info');
+    }
+
+    // Toast notifications
+    function showToast(msg, type = 'primary') {
+      const toastElement = document.getElementById('liveToast');
+      const toastBody = document.getElementById('toast-msg');
+      const toastIcon = toastElement.querySelector('i');
+
+      // Update icon based on type
+      const icons = {
+        'success': 'bi-check-circle-fill text-success',
+        'danger': 'bi-exclamation-triangle-fill text-danger',
+        'warning': 'bi-exclamation-triangle-fill text-warning',
+        'info': 'bi-info-circle-fill text-info',
+        'primary': 'bi-info-circle-fill text-primary'
+      };
+
+      toastIcon.className = `bi ${icons[type] || icons.primary} me-2`;
+      toastBody.textContent = msg;
+
+      const toast = new bootstrap.Toast(toastElement);
+      toast.show();
+    }
+
+    // Auto-save functionality
+    function saveAnswers() {
+      const answers = {};
+      document.querySelectorAll('.answer-textarea').forEach((textarea, index) => {
+        answers[index] = textarea.value;
+      });
+      localStorage.setItem('interview_answers', JSON.stringify(answers));
+    }
+
+    function loadAnswers() {
+      const saved = localStorage.getItem('interview_answers');
+      if (saved) {
+        const answers = JSON.parse(saved);
+        document.querySelectorAll('.answer-textarea').forEach((textarea, index) => {
+          if (answers[index]) {
+            textarea.value = answers[index];
+          }
+        });
+        updateProgressBarAndEvalBtn();
+      }
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.getElementById('theme-icon').className = isDark ? 'bi bi-brightness-high-fill' : 'bi bi-moon-stars-fill';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function () {
+      // Load theme
+      if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark');
+        document.getElementById('theme-icon').className = 'bi bi-brightness-high-fill';
+      }
+
+      // Load saved answers
+      loadAnswers();
+
+      // Update topics when role changes
+      document.getElementById('role').addEventListener('input', updateTopicOptions);
+      updateTopicOptions();
+
+      // Progress tracking
+      document.addEventListener('input', function (e) {
+        if (e.target.classList.contains('answer-textarea')) {
+          updateWordCount(e.target);
+          updateProgressBarAndEvalBtn();
+          saveAnswers();
+
+          // Show typing indicator
+          const typingIndicator = e.target.closest('.question-body').querySelector('.typing-indicator');
+          if (typingIndicator) {
+            typingIndicator.classList.add('active');
+            clearTimeout(typingIndicator.timeout);
+            typingIndicator.timeout = setTimeout(() => {
+              typingIndicator.classList.remove('active');
+            }, 1000);
+          }
+        }
+      });
+
+      // Focus effects
+      document.addEventListener('focusin', function (e) {
+        if (e.target.classList.contains('answer-textarea')) {
+          document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active'));
+          e.target.closest('.question-card').classList.add('active');
+        }
+      });
+
+      document.addEventListener('focusout', function (e) {
+        if (e.target.classList.contains('answer-textarea')) {
+          e.target.closest('.question-card').classList.remove('active');
+        }
+      });
+
+      // Form submission
+      document.getElementById('interview-form').addEventListener('submit', function () {
+        document.getElementById('loading-spinner').style.display = 'block';
+        localStorage.removeItem('interview_answers');
+      });
+
+      // QA form submission
+      const qaForm = document.getElementById('qa-form');
+      if (qaForm) {
+        qaForm.addEventListener('submit', function (e) {
+          const answerInputs = qaForm.querySelectorAll('textarea[name="answer"]');
+          let hasAnswer = false;
+
+          for (let textarea of answerInputs) {
+            if (textarea.value.trim() !== '') {
+              hasAnswer = true;
+              break;
+            }
+          }
+
+          if (!hasAnswer) {
+            showToast('Please answer at least one question before evaluating.', 'warning');
+            e.preventDefault();
+          }
+        });
+      }
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', function (e) {
+        // Ctrl/Cmd + Enter to submit
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          const evalBtn = document.getElementById('evaluate-all-btn');
+          if (evalBtn && evalBtn.style.display !== 'none') {
+            evalBtn.click();
+          }
+        }
+
+        // Escape to clear current answer
+        if (e.key === 'Escape' && e.target.classList.contains('answer-textarea')) {
+          e.target.value = '';
+          e.target.dispatchEvent(new Event('input'));
+        }
+      });
+
+      updateProgressBarAndEvalBtn();
+    });
+  </script>
+</body>
+
+</html>

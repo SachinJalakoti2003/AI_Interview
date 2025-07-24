@@ -1,0 +1,2 @@
+Generate 5 interview questions for a {role} at {level} level on the topic of {topic}.
+Make sure the questions are clear, relevant, and suitable for an interview setting. 
