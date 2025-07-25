@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Test Page - Navbar Check{% endblock %}
+
+{% block content %}
+<div class="container mt-5 pt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h1 class="card-title">🧪 Navbar Test Page</h1>
+                    <p class="card-text">This is a test page to verify the navbar is working correctly.</p>
+                    
+                    <div class="alert alert-info">
+                        <h5>✅ If you can see this page, the base template is working!</h5>
+                        <p>Check the top of the page for the navbar with:</p>
+                        <ul class="list-unstyled">
+                            <li>🤖 AI Interview Coach logo</li>
+                            <li>📱 Navigation links (Home, Features, etc.)</li>
+                            <li>🌙 Theme toggle button</li>
+                            <li>🔐 Login/Signup buttons</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-primary me-2">Go to Home</a>
+                        <a href="/login" class="btn btn-outline-secondary me-2">Test Login</a>
+                        <a href="/signup" class="btn btn-outline-secondary">Test Signup</a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button onclick="testTheme()" class="btn btn-info me-2">Test Theme Toggle</button>
+                        <button onclick="testToast()" class="btn btn-success">Test Toast</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function testTheme() {
+    toggleTheme();
+    showToast('Theme toggled successfully!', 'success');
+}
+
+function testToast() {
+    showToast('Toast notification is working! 🎉', 'info', 'Test Success');
+}
+
+// Log navbar status
+console.log('🔍 Navbar Debug Info:');
+console.log('Navbar element:', document.querySelector('.navbar-custom'));
+console.log('Auth buttons:', document.querySelector('.auth-buttons'));
+console.log('Guest buttons:', document.getElementById('auth-buttons-guest'));
+console.log('User logged in:', localStorage.getItem('isLoggedIn'));
+</script>
+{% endblock %}

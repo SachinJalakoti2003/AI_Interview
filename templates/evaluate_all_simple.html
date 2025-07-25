@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Interview Feedback - AI Interview Coach{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">Interview Complete! 🎉</h1>
+            <p class="text-center lead mb-5">Here's your personalized feedback</p>
+            
+            {% for result in results %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Question {{ loop.index }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Question:</strong>
+                        <p>{{ result.question }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Your Answer:</strong>
+                        <p>{{ result.answer }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>AI Feedback:</strong>
+                        <div class="alert alert-info">
+                            {{ result.feedback | replace('\n', '<br>') | safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="text-center mt-5">
+                <a href="/dashboard" class="btn btn-secondary me-3">Back to Dashboard</a>
+                <a href="/interview" class="btn btn-primary">Practice Again</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

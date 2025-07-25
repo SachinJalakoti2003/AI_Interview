@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Interview Coach - Practice & Excel{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            /* Colors */
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #dbeafe;
+            --secondary: #64748b;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --info: #0891b2;
+            
+            /* Backgrounds */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --bg-quaternary: #e2e8f0;
+            
+            /* Dark mode backgrounds */
+            --bg-dark: #0f172a;
+            --bg-dark-secondary: #1e293b;
+            --bg-dark-tertiary: #334155;
+            --bg-dark-quaternary: #475569;
+            
+            /* Text colors */
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --text-quaternary: #94a3b8;
+            
+            /* Dark mode text */
+            --text-dark-primary: #f8fafc;
+            --text-dark-secondary: #cbd5e1;
+            --text-dark-tertiary: #94a3b8;
+            --text-dark-quaternary: #64748b;
+            
+            /* Borders */
+            --border-light: #e2e8f0;
+            --border-medium: #cbd5e1;
+            --border-dark: #475569;
+            
+            /* Shadows */
+            --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            
+            /* Border radius */
+            --radius-xs: 0.125rem;
+            --radius-sm: 0.25rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --radius-3xl: 1.5rem;
+            --radius-full: 9999px;
+            
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Spacing */
+            --navbar-height: 4rem;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin: 0;
+            padding-top: var(--navbar-height);
+            transition: all var(--transition-normal);
+            overflow-x: hidden;
+        }
+
+        body.dark {
+            background: var(--bg-dark);
+            color: var(--text-dark-primary);
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 30s ease-in-out infinite;
+        }
+
+        body.dark::before {
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.15) 0%, transparent 50%);
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: translateX(0) translateY(0) rotate(0deg); }
+            25% { transform: translateX(-20px) translateY(-10px) rotate(1deg); }
+            50% { transform: translateX(20px) translateY(10px) rotate(-1deg); }
+            75% { transform: translateX(-10px) translateY(20px) rotate(0.5deg); }
+        }
+
+        /* Navbar Styles - Fixed for proper top positioning */
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(20px) !important;
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 1050 !important;
+            height: var(--navbar-height) !important;
+            padding: 0.5rem 0 !important;
+        }
+
+        body.dark .navbar-custom {
+            background: rgba(30, 41, 59, 0.95) !important;
+            border-bottom-color: rgba(71, 85, 105, 0.8) !important;
+        }
+
+        /* Container for proper centering */
+        .navbar-custom .container-fluid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        /* Center the brand name */
+        .navbar-brand {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 800;
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 10;
+        }
+
+        .navbar-brand i {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Left side navigation */
+        .navbar-nav {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-item {
+            list-style: none;
+        }
+
+        /* Right side auth buttons */
+        .auth-buttons {
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.75rem !important;
+            margin-left: auto;
+        }
+
+        /* Mobile toggle button */
+        .navbar-toggler {
+            border: none;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            z-index: 11;
+        }
+
+        body.dark .navbar-toggler {
+            background: var(--bg-dark-tertiary);
+            color: var(--text-dark-secondary);
+        }
+
+        /* Responsive behavior */
+        @media (max-width: 991.98px) {
+            .navbar-brand {
+                position: static;
+                transform: none;
+                font-size: 1.5rem;
+            }
+            
+            .navbar-collapse {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: var(--bg-primary);
+                border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+                padding: 1.5rem;
+                box-shadow: var(--shadow-lg);
+                border: 1px solid var(--border-light);
+                border-top: none;
+            }
+
+            body.dark .navbar-collapse {
+                background: var(--bg-dark-secondary);
+                border-color: var(--border-dark);
+            }
+
+            .navbar-nav {
+                flex-direction: column !important;
+                align-items: stretch;
+                gap: 0.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 1rem;
+            }
+
+            .btn-auth {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 50%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand:hover {
+            text-decoration: none;
+            transform: scale(1.02);
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-lg);
+            transition: all var(--transition-fast);
+            position: relative;
+            margin: 0 0.25rem;
+        }
+
+        body.dark .navbar-nav .nav-link {
+            color: var(--text-dark-secondary);
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateY(-1px);
+        }
+
+        body.dark .navbar-nav .nav-link:hover {
+            color: var(--primary-light);
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .navbar-nav .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-light);
+            font-weight: 600;
+        }
+
+        body.dark .navbar-nav .nav-link.active {
+            color: var(--text-dark-primary);
+            background: rgba(37, 99, 235, 0.3);
+        }
+
+        /* Auth Buttons */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-auth {
+            padding: 0.5rem 1.25rem;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all var(--transition-fast);
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-login {
+            color: var(--text-secondary);
+            background: transparent;
+            border: 1px solid var(--border-medium);
+        }
+
+        .btn-login:hover {
+            color: var(--primary);
+            background: var(--primary-light);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            text-decoration: none;
+        }
+
+        body.dark .btn-login {
+            color: var(--text-dark-secondary);
+            border-color: var(--border-dark);
+        }
+
+        body.dark .btn-login:hover {
+            color: var(--text-dark-primary);
+            background: rgba(37, 99, 235, 0.2);
+            border-color: var(--primary);
+        }
+
+        .btn-signup {
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-signup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-signup:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-signup:hover::before {
+            left: 100%;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: none;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.125rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: 1px solid var(--border-light);
+        }
+
+        body.dark .theme-toggle {
+            background: var(--bg-dark-tertiary);
+            color: var(--text-dark-secondary);
+            border-color: var(--border-dark);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        /* User Dropdown */
+        .user-dropdown {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: 2px solid transparent;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Mobile Menu */
+        .navbar-toggler {
+            border: none;
+            padding: 0.25rem;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+        }
+
+        body.dark .navbar-toggler {
+            background: var(--bg-dark-tertiary);
+        }
+
+        .navbar-toggler:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            min-height: calc(100vh - var(--navbar-height));
+            padding: 2rem 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: var(--bg-primary);
+                border-radius: var(--radius-xl);
+                margin-top: 1rem;
+                padding: 1rem;
+                box-shadow: var(--shadow-lg);
+                border: 1px solid var(--border-light);
+            }
+
+            body.dark .navbar-collapse {
+                background: var(--bg-dark-secondary);
+                border-color: var(--border-dark);
+            }
+
+            .navbar-nav {
+                margin-bottom: 1rem;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-auth {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            :root {
+                --navbar-height: 3.5rem;
+            }
+
+            .navbar-brand {
+                font-size: 1.25rem;
+            }
+
+            .main-content {
+                padding: 1rem 0;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -0.25rem;
+            right: -0.25rem;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <!-- Brand -->
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-robot"></i>
+                AI Interview Coach
+            </a>
+
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% if current_user.is_logged_in %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard" id="nav-dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/interview" id="nav-interview">
+                            <i class="bi bi-chat-dots"></i> Start Interview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/stats" id="nav-stats">
+                            <i class="bi bi-graph-up"></i> Analytics
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/" id="nav-home">
+                            <i class="bi bi-house"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/#features">
+                            <i class="bi bi-star"></i> Features
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/#pricing">
+                            <i class="bi bi-tag"></i> Pricing
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Right Side Items -->
+                <div class="auth-buttons">
+                    <!-- Theme Toggle -->
+                    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                        <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+                    </button>
+
+                    <!-- Authentication Buttons (when not logged in) -->
+                    {% if not current_user.is_logged_in %}
+                    <div id="auth-buttons-guest">
+                        <a href="/login" class="btn-auth btn-login">
+                            <i class="bi bi-box-arrow-in-right"></i>
+                            Log In
+                        </a>
+                        <a href="/signup" class="btn-auth btn-signup">
+                            <i class="bi bi-person-plus"></i>
+                            Sign Up
+                        </a>
+                    </div>
+                    {% else %}
+                    <!-- User Menu (when logged in) -->
+                    <div id="auth-buttons-user" class="user-dropdown">
+                        <div class="user-avatar" onclick="toggleUserMenu()">
+                            <span id="user-initials">{{ current_user.initials }}</span>
+                            <div class="notification-badge" id="notification-badge" style="display: none;">3</div>
+                        </div>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="dropdown-menu dropdown-menu-end" id="user-menu" style="display: none;">
+                            <div class="dropdown-header">
+                                <strong id="user-name">{{ current_user.name }}</strong>
+                                <small class="text-muted" id="user-email">{{ current_user.email }}</small>
+                            </div>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/dashboard">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="showComingSoon()">
+                                <i class="bi bi-person"></i> Profile
+                            </a>
+                            <a class="dropdown-item" href="#" onclick="showComingSoon()">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="/logout">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 start-50 translate-middle-x mt-5 pt-3" style="z-index: 9999;">
+        <div id="globalToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i class="bi bi-info-circle-fill text-primary me-2" id="toast-icon"></i>
+                <strong class="me-auto" id="toast-title">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toast-message">
+                <!-- Message content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Global JavaScript functions
+        
+        // Theme Toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            document.getElementById('theme-icon').className = isDark ? 'bi bi-brightness-high-fill' : 'bi bi-moon-stars-fill';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // Load theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark');
+                document.getElementById('theme-icon').className = 'bi bi-brightness-high-fill';
+            }
+        });
+
+        // User Menu Toggle
+        function toggleUserMenu() {
+            const menu = document.getElementById('user-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Close user menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const userDropdown = document.querySelector('.user-dropdown');
+            const userMenu = document.getElementById('user-menu');
+            
+            if (userDropdown && !userDropdown.contains(event.target)) {
+                userMenu.style.display = 'none';
+            }
+        });
+
+        // Global Toast Function
+        function showToast(message, type = 'info', title = 'Notification') {
+            const toast = document.getElementById('globalToast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastTitle = document.getElementById('toast-title');
+            const toastMessage = document.getElementById('toast-message');
+            
+            // Icon mapping
+            const icons = {
+                'success': 'bi-check-circle-fill text-success',
+                'error': 'bi-exclamation-triangle-fill text-danger',
+                'warning': 'bi-exclamation-triangle-fill text-warning',
+                'info': 'bi-info-circle-fill text-info'
+            };
+            
+            toastIcon.className = `bi ${icons[type] || icons.info} me-2`;
+            toastTitle.textContent = title;
+            toastMessage.textContent = message;
+            
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+        }
+
+        // Check user authentication state
+        function checkAuthState() {
+            // Check if user is logged in (this would normally check with your backend)
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const guestButtons = document.getElementById('auth-buttons-guest');
+            const userButtons = document.getElementById('auth-buttons-user');
+            const dashboardLink = document.getElementById('nav-dashboard');
+            
+            if (isLoggedIn) {
+                // Show user menu, hide guest buttons
+                if (guestButtons) guestButtons.style.display = 'none';
+                if (userButtons) userButtons.style.display = 'block';
+                if (dashboardLink) dashboardLink.style.display = 'block';
+                
+                // Update user info if available
+                const userName = localStorage.getItem('user_name') || 'User';
+                const userEmail = localStorage.getItem('user_email') || 'user@example.com';
+                
+                const userNameElement = document.getElementById('user-name');
+                const userEmailElement = document.getElementById('user-email');
+                const userInitialsElement = document.getElementById('user-initials');
+                
+                if (userNameElement) userNameElement.textContent = userName;
+                if (userEmailElement) userEmailElement.textContent = userEmail;
+                if (userInitialsElement) {
+                    const initials = userName.split(' ').map(n => n[0]).join('').toUpperCase();
+                    userInitialsElement.textContent = initials;
+                }
+                
+                // Show notification badge occasionally
+                if (Math.random() > 0.7) {
+                    const notificationBadge = document.getElementById('notification-badge');
+                    if (notificationBadge) notificationBadge.style.display = 'flex';
+                }
+            } else {
+                // Show guest buttons, hide user menu
+                if (guestButtons) guestButtons.style.display = 'flex';
+                if (userButtons) userButtons.style.display = 'none';
+                if (dashboardLink) dashboardLink.style.display = 'none';
+            }
+        }
+
+        // Initialize auth state on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthState();
+            setActiveNavigation();
+            
+            // Debug: Ensure navbar is visible
+            const navbar = document.querySelector('.navbar-custom');
+            if (navbar) {
+                console.log('✅ Navbar found and should be visible');
+                navbar.style.display = 'block !important';
+                navbar.style.visibility = 'visible !important';
+                navbar.style.opacity = '1';
+                navbar.style.position = 'fixed';
+                navbar.style.top = '0';
+                navbar.style.left = '0';
+                navbar.style.right = '0';
+                navbar.style.zIndex = '1050';
+                
+                // Check auth buttons
+                const authButtons = document.querySelector('.auth-buttons');
+                if (authButtons) {
+                    console.log('✅ Auth buttons found');
+                    authButtons.style.display = 'flex !important';
+                } else {
+                    console.error('❌ Auth buttons not found!');
+                }
+                
+                // Force show login/signup buttons for testing
+                const guestButtons = document.getElementById('auth-buttons-guest');
+                if (guestButtons) {
+                    console.log('✅ Guest buttons found');
+                    guestButtons.style.display = 'flex !important';
+                } else {
+                    console.log('ℹ️ Guest buttons not found (user might be logged in)');
+                }
+            } else {
+                console.error('❌ Navbar not found!');
+                // Create a simple navbar for debugging
+                const debugNavbar = document.createElement('div');
+                debugNavbar.innerHTML = `
+                    <div style="position: fixed; top: 0; left: 0; right: 0; background: red; color: white; padding: 1rem; z-index: 9999;">
+                        DEBUG: Navbar not found! Check template structure.
+                        <a href="/login" style="color: white; margin-left: 1rem;">Login</a>
+                        <a href="/signup" style="color: white; margin-left: 1rem;">Signup</a>
+                    </div>
+                `;
+                document.body.prepend(debugNavbar);
+            }
+        });
+
+        // Set active navigation based on current page
+        function setActiveNavigation() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+            
+            // Remove active class from all links
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            // Add active class to current page link
+            if (currentPath === '/' || currentPath === '') {
+                document.getElementById('nav-home')?.classList.add('active');
+            } else if (currentPath.includes('/admin/stats')) {
+                document.getElementById('nav-stats')?.classList.add('active');
+            } else if (currentPath.includes('/dashboard')) {
+                // Add dashboard link if it exists
+                const dashboardLink = document.querySelector('a[href="/dashboard"]');
+                if (dashboardLink) dashboardLink.classList.add('active');
+            }
+        }
+
+        // Navbar scroll effect (disabled for now to ensure navbar is always visible)
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar-custom');
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Keep navbar always visible for now
+            navbar.style.transform = 'translateY(0)';
+            
+            // Optional: Add shadow on scroll
+            if (scrollTop > 10) {
+                navbar.style.boxShadow = 'var(--shadow-lg)';
+            } else {
+                navbar.style.boxShadow = 'var(--shadow-sm)';
+            }
+        });
+
+        // Add loading state to buttons
+        function addLoadingState(button, originalText) {
+            button.disabled = true;
+            button.innerHTML = `<span class="loading-dots">Loading</span>`;
+            
+            return function() {
+                button.disabled = false;
+                button.innerHTML = originalText;
+            };
+        }
+
+        // Show coming soon message
+        function showComingSoon() {
+            showToast('This feature is coming soon! Stay tuned for updates.', 'info', 'Coming Soon');
+        }
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Update localStorage when user logs in (for JavaScript state management)
+        function updateAuthState(isLoggedIn, userName = '', userEmail = '') {
+            if (isLoggedIn) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('user_name', userName);
+                localStorage.setItem('user_email', userEmail);
+            } else {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('user_name');
+                localStorage.removeItem('user_email');
+            }
+            checkAuthState();
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

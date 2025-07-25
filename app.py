@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify, redirect
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
@@ -27,8 +27,33 @@ evaluate_prompt = PromptTemplate.from_template(eval_template)
 generate_chain = LLMChain(llm=llm, prompt=question_prompt)
 evaluate_chain = LLMChain(llm=llm, prompt=evaluate_prompt)
 
-@app.route("/", methods=["GET", "POST"])
+# Context processor to make user data available to all templates
+@app.context_processor
+def inject_user():
+    return {
+        'current_user': {
+            'is_logged_in': session.get('is_logged_in', False),
+            'name': session.get('user_name', ''),
+            'email': session.get('user_email', ''),
+            'initials': session.get('user_name', 'U')[0].upper() if session.get('user_name') else 'U'
+        }
+    }
+
+@app.route("/")
 def home():
+    # Show welcome page if user is not authenticated
+    if not session.get('is_logged_in'):
+        return render_template("welcome.html")
+    
+    # If authenticated, redirect to dashboard
+    return redirect("/dashboard")
+
+@app.route("/interview", methods=["GET", "POST"])
+def interview():
+    # Redirect to login if user is not authenticated
+    if not session.get('is_logged_in'):
+        return redirect("/login")
+    
     if request.method == "POST":
         role = request.form["role"]
         level = request.form["level"]
@@ -54,6 +79,10 @@ def home():
 
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
+    # Redirect to login if user is not authenticated
+    if not session.get('is_logged_in'):
+        return redirect("/login")
+    
     question = request.form["question"]
     answer = request.form["answer"]
     feedback = evaluate_chain.run(question=question, answer=answer)
@@ -61,6 +90,10 @@ def evaluate():
 
 @app.route("/evaluate_all", methods=["POST"])
 def evaluate_all():
+    # Redirect to login if user is not authenticated
+    if not session.get('is_logged_in'):
+        return redirect("/login")
+    
     questions = request.form.getlist("question")
     answers = request.form.getlist("answer")
     filtered = [(q, a) for q, a in zip(questions, answers) if a.strip()]
@@ -99,12 +132,16 @@ def evaluate_all():
         except Exception as e:
             print(f"Error saving answers to database: {e}")
     
-    return render_template("evaluate_all.html", results=results)
+    return render_template("evaluate_all_simple.html", results=results)
 
 # Admin/Analytics routes for viewing stored data
 @app.route("/admin/stats")
 def admin_stats():
     """View basic statistics about stored interviews"""
+    # Redirect to login if user is not authenticated
+    if not session.get('is_logged_in'):
+        return redirect("/login")
+    
     stats = db.get_interview_stats()
     recent_interviews = db.get_recent_interviews(20)
     return render_template("admin_stats.html", stats=stats, recent_interviews=recent_interviews)
@@ -112,6 +149,10 @@ def admin_stats():
 @app.route("/admin/export")
 def admin_export():
     """Export all data to JSON file"""
+    # Redirect to login if user is not authenticated
+    if not session.get('is_logged_in'):
+        return redirect("/login")
+    
     try:
         # Check if there's any data to export
         stats = db.get_interview_stats()
@@ -173,6 +214,86 @@ def admin_download(filename):
 def api_stats():
     """API endpoint for getting statistics"""
     return jsonify(db.get_interview_stats())
+
+# Authentication routes
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """Login page"""
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        remember = request.form.get("remember")
+        
+        # TODO: Implement actual authentication logic
+        # For now, simulate login
+        if email and password:
+            session['user_email'] = email
+            session['user_name'] = email.split('@')[0].title()
+            session['is_logged_in'] = True
+            
+            # Always redirect to dashboard after login
+            return redirect('/dashboard')
+        else:
+            return render_template("login.html", error="Invalid email or password")
+    
+    return render_template("login.html")
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    """Signup page"""
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        confirm_password = request.form.get("confirm_password")
+        terms = request.form.get("terms")
+        
+        # Basic validation
+        if not all([name, email, password, confirm_password]):
+            return render_template("signup.html", error="All fields are required")
+        
+        if password != confirm_password:
+            return render_template("signup.html", error="Passwords do not match")
+        
+        if not terms:
+            return render_template("signup.html", error="You must accept the terms and conditions")
+        
+        # TODO: Implement actual user registration logic
+        # For now, simulate registration
+        session['user_email'] = email
+        session['user_name'] = name
+        session['is_logged_in'] = True
+        
+        return redirect("/dashboard")
+    
+    return render_template("signup.html")
+
+@app.route("/logout")
+def logout():
+    """Logout user"""
+    session.clear()
+    return redirect("/")
+
+@app.route("/dashboard")
+def dashboard():
+    """User dashboard"""
+    if not session.get('is_logged_in'):
+        return redirect("/login?next=/dashboard")
+    
+    # Get user stats
+    stats = db.get_interview_stats()
+    recent_interviews = db.get_recent_interviews(5)
+    
+    return render_template("dashboard.html", 
+                         user_name=session.get('user_name'),
+                         user_email=session.get('user_email'),
+                         stats=stats,
+                         recent_interviews=recent_interviews)
+
+@app.route("/test")
+def test_page():
+    """Test page to verify navbar is working"""
+    return render_template("test.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

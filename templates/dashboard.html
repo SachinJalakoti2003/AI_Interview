@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Interview Coach{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        padding: 2rem 0;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        color: white;
+        border-radius: var(--radius-2xl);
+        padding: 3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(50px, -50px);
+    }
+
+    .dashboard-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        transform: translate(-50px, 50px);
+    }
+
+    .dashboard-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .welcome-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-subtitle {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+
+    .quick-stats {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 1rem 1.5rem;
+        border-radius: var(--radius-xl);
+        backdrop-filter: blur(10px);
+    }
+
+    .stat-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .stat-info h4 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .stat-info p {
+        font-size: 0.875rem;
+        margin: 0;
+        opacity: 0.8;
+    }
+
+    /* Dashboard Cards */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .dashboard-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        border: 1px solid var(--border-light);
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.dark .dashboard-card {
+        background: var(--bg-dark-secondary);
+        border-color: var(--border-dark);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    body.dark .card-title {
+        color: var(--text-dark-primary);
+    }
+
+    .card-action {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all var(--transition-fast);
+    }
+
+    .card-action:hover {
+        color: var(--primary-hover);
+        text-decoration: none;
+    }
+
+    /* Recent Activity */
+    .activity-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    body.dark .activity-item {
+        border-color: var(--border-dark);
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    body.dark .activity-icon {
+        background: rgba(37, 99, 235, 0.2);
+        color: var(--primary-light);
+    }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    body.dark .activity-title {
+        color: var(--text-dark-primary);
+    }
+
+    .activity-meta {
+        font-size: 0.875rem;
+        color: var(--text-tertiary);
+    }
+
+    body.dark .activity-meta {
+        color: var(--text-dark-tertiary);
+    }
+
+    /* Progress Chart */
+    .progress-chart {
+        height: 200px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 1rem 0;
+    }
+
+    .progress-bar-chart {
+        flex: 1;
+        background: var(--border-light);
+        border-radius: var(--radius-sm);
+        position: relative;
+        min-height: 20px;
+        transition: all var(--transition-normal);
+    }
+
+    body.dark .progress-bar-chart {
+        background: var(--border-dark);
+    }
+
+    .progress-bar-fill {
+        background: linear-gradient(to top, var(--primary), #8b5cf6);
+        border-radius: var(--radius-sm);
+        width: 100%;
+        transition: height 1s ease-out;
+        position: absolute;
+        bottom: 0;
+    }
+
+    .progress-bar-chart:hover {
+        transform: scale(1.05);
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        flex: 1;
+        min-width: 200px;
+        padding: 1.25rem 2rem;
+        border-radius: var(--radius-xl);
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn-outline {
+        border: 2px solid var(--primary);
+        color: var(--primary);
+        background: transparent;
+    }
+
+    .action-btn-outline:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-3px);
+        text-decoration: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-tertiary);
+    }
+
+    body.dark .empty-state {
+        color: var(--text-dark-tertiary);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    body.dark .empty-state-title {
+        color: var(--text-dark-secondary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 2rem;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+        }
+
+        .quick-stats {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            min-width: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <h1 class="welcome-title">Welcome back, {{ user_name }}! 👋</h1>
+            <p class="welcome-subtitle">Ready to continue your interview preparation journey?</p>
+            
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>{{ stats.total_interviews }}</h4>
+                        <p>Interviews Completed</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>{{ stats.total_answers }}</h4>
+                        <p>Questions Answered</p>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>85%</h4>
+                        <p>Improvement Score</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-clock-history"></i>
+                    Recent Activity
+                </h3>
+                <a href="/admin/stats" class="card-action">View All</a>
+            </div>
+            
+            {% if recent_interviews %}
+            <ul class="activity-list">
+                {% for interview in recent_interviews[:3] %}
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="bi bi-chat-square-text"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">{{ interview.role }} Interview</div>
+                        <div class="activity-meta">
+                            {{ interview.level }} • {{ interview.topic }} • {{ interview.answer_count }} questions
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-chat-square-dots"></i>
+                </div>
+                <div class="empty-state-title">No interviews yet</div>
+                <p>Start your first interview practice session!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Progress Chart -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    Weekly Progress
+                </h3>
+                <a href="#" class="card-action">View Details</a>
+            </div>
+            
+            <div class="progress-chart">
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 60%;"></div>
+                </div>
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 80%;"></div>
+                </div>
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 45%;"></div>
+                </div>
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 90%;"></div>
+                </div>
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 75%;"></div>
+                </div>
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 95%;"></div>
+                </div>
+                <div class="progress-bar-chart">
+                    <div class="progress-bar-fill" style="height: 85%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-lightning"></i>
+                    Quick Actions
+                </h3>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/interview" class="action-btn action-btn-primary">
+                    <i class="bi bi-play-circle"></i>
+                    Start New Interview
+                </a>
+                <a href="/admin/stats" class="action-btn action-btn-outline">
+                    <i class="bi bi-graph-up"></i>
+                    View Analytics
+                </a>
+            </div>
+        </div>
+
+        <!-- Achievements -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-award"></i>
+                    Achievements
+                </h3>
+                <a href="#" class="card-action">View All</a>
+            </div>
+            
+            <ul class="activity-list">
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(5, 150, 105, 0.2); color: var(--success);">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">First Interview Completed</div>
+                        <div class="activity-meta">Completed your first practice session</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(245, 158, 11, 0.2); color: var(--warning);">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Consistent Learner</div>
+                        <div class="activity-meta">Practiced 3 days in a row</div>
+                    </div>
+                </li>
+                <li class="activity-item">
+                    <div class="activity-icon" style="background: rgba(168, 85, 247, 0.2); color: #8b5cf6;">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">Question Master</div>
+                        <div class="activity-meta">Answered 50+ questions</div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Action Section -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h3 class="card-title">
+                <i class="bi bi-rocket-takeoff"></i>
+                Continue Your Journey
+            </h3>
+        </div>
+        
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="/interview" class="action-btn action-btn-primary w-100">
+                    <i class="bi bi-play-circle-fill"></i>
+                    New Interview
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/admin/stats" class="action-btn action-btn-outline w-100">
+                    <i class="bi bi-bar-chart"></i>
+                    View Stats
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="#" class="action-btn action-btn-outline w-100" onclick="showComingSoon()">
+                    <i class="bi bi-gear"></i>
+                    Settings
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Dashboard interactivity
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animate progress bars
+        setTimeout(() => {
+            const progressBars = document.querySelectorAll('.progress-bar-fill');
+            progressBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.opacity = '1';
+                }, index * 100);
+            });
+        }, 500);
+
+        // Update user authentication state
+        localStorage.setItem('isLoggedIn', 'true');
+        
+        // Show welcome message
+        showToast('Welcome to your dashboard! 🎉', 'success');
+    });
+
+    function showComingSoon() {
+        showToast('This feature is coming soon! Stay tuned.', 'info');
+    }
+
+    // Auto-refresh stats every 30 seconds
+    setInterval(() => {
+        fetch('/api/stats')
+            .then(response => response.json())
+            .then(stats => {
+                // Update stats in real-time if needed
+                console.log('Stats updated:', stats);
+            })
+            .catch(error => console.error('Failed to refresh stats:', error));
+    }, 30000);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // 'N' key for new interview
+        if (e.key === 'n' || e.key === 'N') {
+            if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                window.location.href = '/interview';
+            }
+        }
+        
+        // 'S' key for stats
+        if (e.key === 's' || e.key === 'S') {
+            if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                window.location.href = '/admin/stats';
+            }
+        }
+    });
+
+    // Add keyboard shortcut hints
+    document.addEventListener('DOMContentLoaded', function() {
+        const shortcuts = document.createElement('div');
+        shortcuts.style.cssText = `
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            z-index: 1000;
+            opacity: 0.7;
+            transition: opacity var(--transition-fast);
+        `;
+        shortcuts.innerHTML = `
+            <div><kbd>N</kbd> New Interview</div>
+            <div><kbd>S</kbd> Statistics</div>
+        `;
+        
+        shortcuts.addEventListener('mouseenter', () => {
+            shortcuts.style.opacity = '1';
+        });
+        
+        shortcuts.addEventListener('mouseleave', () => {
+            shortcuts.style.opacity = '0.7';
+        });
+        
+        document.body.appendChild(shortcuts);
+    });
+</script>
+{% endblock %}
