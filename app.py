@@ -1,16 +1,30 @@
 import os
-from flask import Flask, render_template, request, session, jsonify, redirect
+from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
 from database import db
 import uuid
+import requests
+import secrets
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-change-this')
+
+# OAuth Configuration
+GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
+GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
+
+# OAuth URLs
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid_configuration"
+GITHUB_AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
+GITHUB_TOKEN_URL = "https://github.com/login/oauth/access_token"
+GITHUB_USER_URL = "https://api.github.com/user"
 
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
 
@@ -30,12 +44,15 @@ evaluate_chain = LLMChain(llm=llm, prompt=evaluate_prompt)
 # Context processor to make user data available to all templates
 @app.context_processor
 def inject_user():
+    user_name = session.get('user_name', '')
     return {
         'current_user': {
             'is_logged_in': session.get('is_logged_in', False),
-            'name': session.get('user_name', ''),
+            'name': user_name,
             'email': session.get('user_email', ''),
-            'initials': session.get('user_name', 'U')[0].upper() if session.get('user_name') else 'U'
+            'initials': user_name[0].upper() if user_name else 'U',
+            'oauth_provider': session.get('oauth_provider'),
+            'avatar': session.get('user_avatar')
         }
     }
 
@@ -289,6 +306,230 @@ def dashboard():
                          user_email=session.get('user_email'),
                          stats=stats,
                          recent_interviews=recent_interviews)
+
+# OAuth Helper Functions
+def get_google_provider_cfg():
+    """Get Google's OAuth configuration"""
+    try:
+        response = requests.get(GOOGLE_DISCOVERY_URL, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching Google OAuth config: {e}")
+        return None
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return None
+
+def generate_state():
+    """Generate a random state parameter for OAuth security"""
+    return secrets.token_urlsafe(32)
+
+# OAuth Routes
+@app.route("/auth/google")
+def google_login():
+    """Initiate Google OAuth login"""
+    # Check if OAuth credentials are configured
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET or GOOGLE_CLIENT_ID.startswith('your-') or 'PASTE_YOUR_REAL' in GOOGLE_CLIENT_ID:
+        # DEMO MODE: Simulate Google login for testing
+        print("🚀 Demo Mode: Simulating Google OAuth login")
+        session['user_email'] = 'demo.google@example.com'
+        session['user_name'] = 'Google Demo User'
+        session['is_logged_in'] = True
+        session['oauth_provider'] = 'google'
+        session['user_avatar'] = 'https://via.placeholder.com/150/4285f4/ffffff?text=G'
+        
+        return redirect('/dashboard')
+    
+    # Generate state parameter for security
+    state = generate_state()
+    session['oauth_state'] = state
+    
+    # Get Google's OAuth configuration
+    google_cfg = get_google_provider_cfg()
+    if not google_cfg:
+        error_msg = """
+        Unable to connect to Google's OAuth service. This could be due to:
+        
+        1. Network connectivity issues
+        2. Invalid OAuth credentials in .env file
+        3. Google services temporarily unavailable
+        
+        Please check your internet connection and OAuth credentials, then try again.
+        """
+        return render_template("login.html", error=error_msg)
+    
+    # Build authorization URL
+    authorization_endpoint = google_cfg["authorization_endpoint"]
+    redirect_uri = url_for('google_callback', _external=True)
+    
+    auth_url = (
+        f"{authorization_endpoint}?"
+        f"client_id={GOOGLE_CLIENT_ID}&"
+        f"redirect_uri={redirect_uri}&"
+        f"scope=openid email profile&"
+        f"response_type=code&"
+        f"state={state}&"
+        f"prompt=select_account&"
+        f"access_type=offline&"
+        f"include_granted_scopes=true"
+    )
+    
+    return redirect(auth_url)
+
+@app.route("/auth/google/callback")
+def google_callback():
+    """Handle Google OAuth callback"""
+    # Verify state parameter
+    if request.args.get('state') != session.get('oauth_state'):
+        return render_template("login.html", error="Invalid state parameter. Please try logging in again.")
+    
+    # Get authorization code
+    code = request.args.get('code')
+    if not code:
+        return render_template("login.html", error="Authorization failed. Please try again.")
+    
+    # Get Google's OAuth configuration
+    google_cfg = get_google_provider_cfg()
+    if not google_cfg:
+        return render_template("login.html", error="Unable to connect to Google. Please try again later.")
+    
+    # Exchange code for token
+    token_endpoint = google_cfg["token_endpoint"]
+    redirect_uri = url_for('google_callback', _external=True)
+    
+    token_data = {
+        'client_id': GOOGLE_CLIENT_ID,
+        'client_secret': GOOGLE_CLIENT_SECRET,
+        'code': code,
+        'grant_type': 'authorization_code',
+        'redirect_uri': redirect_uri,
+    }
+    
+    try:
+        token_response = requests.post(token_endpoint, data=token_data)
+        token_json = token_response.json()
+        
+        if 'access_token' not in token_json:
+            return render_template("login.html", error="Failed to get access token from Google.")
+        
+        # Get user info
+        userinfo_endpoint = google_cfg["userinfo_endpoint"]
+        headers = {'Authorization': f'Bearer {token_json["access_token"]}'}
+        user_response = requests.get(userinfo_endpoint, headers=headers)
+        user_info = user_response.json()
+        
+        # Create session
+        session['user_email'] = user_info.get('email')
+        session['user_name'] = user_info.get('name', user_info.get('email', '').split('@')[0])
+        session['is_logged_in'] = True
+        session['oauth_provider'] = 'google'
+        session['user_avatar'] = user_info.get('picture')
+        
+        # Clean up OAuth state
+        session.pop('oauth_state', None)
+        
+        return redirect('/dashboard')
+        
+    except Exception as e:
+        print(f"Google OAuth error: {e}")
+        return render_template("login.html", error="Failed to authenticate with Google. Please try again.")
+
+@app.route("/auth/github")
+def github_login():
+    """Initiate GitHub OAuth login"""
+    # Check if OAuth credentials are configured
+    if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET or GITHUB_CLIENT_ID.startswith('your-') or 'PASTE_YOUR_REAL' in GITHUB_CLIENT_ID:
+        # DEMO MODE: Simulate GitHub login for testing
+        print("🚀 Demo Mode: Simulating GitHub OAuth login")
+        session['user_email'] = 'demo.github@example.com'
+        session['user_name'] = 'GitHub Demo User'
+        session['is_logged_in'] = True
+        session['oauth_provider'] = 'github'
+        session['user_avatar'] = 'https://via.placeholder.com/150/333333/ffffff?text=GH'
+        
+        return redirect('/dashboard')
+    
+    # Generate state parameter for security
+    state = generate_state()
+    session['oauth_state'] = state
+    
+    # Build authorization URL
+    redirect_uri = url_for('github_callback', _external=True)
+    
+    auth_url = (
+        f"{GITHUB_AUTHORIZE_URL}?"
+        f"client_id={GITHUB_CLIENT_ID}&"
+        f"redirect_uri={redirect_uri}&"
+        f"scope=user:email&"
+        f"state={state}&"
+        f"allow_signup=true"
+    )
+    
+    return redirect(auth_url)
+
+@app.route("/auth/github/callback")
+def github_callback():
+    """Handle GitHub OAuth callback"""
+    # Verify state parameter
+    if request.args.get('state') != session.get('oauth_state'):
+        return render_template("login.html", error="Invalid state parameter. Please try logging in again.")
+    
+    # Get authorization code
+    code = request.args.get('code')
+    if not code:
+        return render_template("login.html", error="Authorization failed. Please try again.")
+    
+    # Exchange code for token
+    token_data = {
+        'client_id': GITHUB_CLIENT_ID,
+        'client_secret': GITHUB_CLIENT_SECRET,
+        'code': code,
+    }
+    
+    headers = {'Accept': 'application/json'}
+    
+    try:
+        token_response = requests.post(GITHUB_TOKEN_URL, data=token_data, headers=headers)
+        token_json = token_response.json()
+        
+        if 'access_token' not in token_json:
+            return render_template("login.html", error="Failed to get access token from GitHub.")
+        
+        # Get user info
+        headers = {
+            'Authorization': f'token {token_json["access_token"]}',
+            'Accept': 'application/json'
+        }
+        user_response = requests.get(GITHUB_USER_URL, headers=headers)
+        user_info = user_response.json()
+        
+        # Get user email (GitHub might not provide it in the main user endpoint)
+        email = user_info.get('email')
+        if not email:
+            # Try to get email from the emails endpoint
+            emails_response = requests.get('https://api.github.com/user/emails', headers=headers)
+            emails = emails_response.json()
+            for email_obj in emails:
+                if email_obj.get('primary'):
+                    email = email_obj.get('email')
+                    break
+        
+        # Create session
+        session['user_email'] = email or f"{user_info.get('login')}@github.local"
+        session['user_name'] = user_info.get('name') or user_info.get('login', 'GitHub User')
+        session['is_logged_in'] = True
+        session['oauth_provider'] = 'github'
+        session['user_avatar'] = user_info.get('avatar_url')
+        
+        # Clean up OAuth state
+        session.pop('oauth_state', None)
+        
+        return redirect('/dashboard')
+        
+    except Exception as e:
+        print(f"GitHub OAuth error: {e}")
+        return render_template("login.html", error="Failed to authenticate with GitHub. Please try again.")
 
 @app.route("/test")
 def test_page():

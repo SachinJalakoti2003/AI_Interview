@@ -3,4 +3,5 @@ langchain
 langchain-google-genai
 google-ai-generativelanguage
 python-dotenv
+requests        # For OAuth API calls
 gunicorn        # For deployment on platforms like Render or Railway
