@@ -1,0 +1,790 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - AI Interview Coach{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        padding: 2rem 0;
+    }
+
+    /* Profile Header */
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        color: white;
+        border-radius: var(--radius-2xl);
+        padding: 3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(100px, -100px);
+    }
+
+    .profile-header-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        flex-shrink: 0;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .profile-info h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-info .user-email {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        margin-bottom: 1rem;
+    }
+
+    .profile-badges {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .profile-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        border: 1px solid var(--border-light);
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.dark .stat-card {
+        background: var(--bg-dark-secondary);
+        border-color: var(--border-dark);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--success));
+    }
+
+    .stat-icon {
+        width: 3rem;
+        height: 3rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    body.dark .stat-icon {
+        background: rgba(37, 99, 235, 0.2);
+        color: var(--primary-light);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    body.dark .stat-value {
+        color: var(--text-dark-primary);
+    }
+
+    .stat-label {
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    body.dark .stat-label {
+        color: var(--text-dark-secondary);
+    }
+
+    /* Content Grid */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 3rem;
+    }
+
+    .content-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-2xl);
+        padding: 2rem;
+        border: 1px solid var(--border-light);
+        height: fit-content;
+    }
+
+    body.dark .content-card {
+        background: var(--bg-dark-secondary);
+        border-color: var(--border-dark);
+    }
+
+    .content-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+    }
+
+    .content-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    body.dark .content-title {
+        color: var(--text-dark-primary);
+    }
+
+    .content-action {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.875rem;
+        transition: all var(--transition-fast);
+    }
+
+    .content-action:hover {
+        color: var(--primary-hover);
+        text-decoration: none;
+    }
+
+    /* Interview History */
+    .interview-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .interview-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem 0;
+        border-bottom: 1px solid var(--border-light);
+        transition: all var(--transition-fast);
+    }
+
+    body.dark .interview-item {
+        border-color: var(--border-dark);
+    }
+
+    .interview-item:last-child {
+        border-bottom: none;
+    }
+
+    .interview-item:hover {
+        background: var(--bg-secondary);
+        margin: 0 -1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-radius: var(--radius-lg);
+    }
+
+    body.dark .interview-item:hover {
+        background: var(--bg-dark-tertiary);
+    }
+
+    .interview-icon {
+        width: 3rem;
+        height: 3rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    body.dark .interview-icon {
+        background: rgba(37, 99, 235, 0.2);
+        color: var(--primary-light);
+    }
+
+    .interview-content {
+        flex: 1;
+    }
+
+    .interview-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    body.dark .interview-title {
+        color: var(--text-dark-primary);
+    }
+
+    .interview-meta {
+        font-size: 0.875rem;
+        color: var(--text-tertiary);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    body.dark .interview-meta {
+        color: var(--text-dark-tertiary);
+    }
+
+    .interview-score {
+        background: var(--success);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Activity Chart */
+    .activity-chart {
+        height: 200px;
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 1rem 0;
+        margin-bottom: 1rem;
+    }
+
+    .activity-bar {
+        flex: 1;
+        background: var(--border-light);
+        border-radius: var(--radius-sm);
+        position: relative;
+        min-height: 20px;
+        transition: all var(--transition-normal);
+        cursor: pointer;
+    }
+
+    body.dark .activity-bar {
+        background: var(--border-dark);
+    }
+
+    .activity-bar-fill {
+        background: linear-gradient(to top, var(--primary), #8b5cf6);
+        border-radius: var(--radius-sm);
+        width: 100%;
+        transition: height 1s ease-out;
+        position: absolute;
+        bottom: 0;
+    }
+
+    .activity-bar:hover {
+        transform: scale(1.05);
+    }
+
+    .activity-bar:hover .activity-tooltip {
+        opacity: 1;
+        transform: translateY(-10px);
+    }
+
+    .activity-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--text-primary);
+        color: var(--bg-primary);
+        padding: 0.5rem;
+        border-radius: var(--radius-md);
+        font-size: 0.75rem;
+        white-space: nowrap;
+        opacity: 0;
+        transition: all var(--transition-fast);
+        pointer-events: none;
+    }
+
+    .activity-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+        margin-top: 0.5rem;
+    }
+
+    body.dark .activity-labels {
+        color: var(--text-dark-tertiary);
+    }
+
+    /* Achievements */
+    .achievement-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .achievement-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    body.dark .achievement-item {
+        border-color: var(--border-dark);
+    }
+
+    .achievement-item:last-child {
+        border-bottom: none;
+    }
+
+    .achievement-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .achievement-icon.gold {
+        background: rgba(245, 158, 11, 0.2);
+        color: #d97706;
+    }
+
+    .achievement-icon.silver {
+        background: rgba(107, 114, 128, 0.2);
+        color: #6b7280;
+    }
+
+    .achievement-icon.bronze {
+        background: rgba(217, 119, 6, 0.2);
+        color: #ea580c;
+    }
+
+    .achievement-content {
+        flex: 1;
+    }
+
+    .achievement-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    body.dark .achievement-title {
+        color: var(--text-dark-primary);
+    }
+
+    .achievement-desc {
+        font-size: 0.875rem;
+        color: var(--text-tertiary);
+    }
+
+    body.dark .achievement-desc {
+        color: var(--text-dark-tertiary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: var(--text-tertiary);
+    }
+
+    body.dark .empty-state {
+        color: var(--text-dark-tertiary);
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+
+    body.dark .empty-state-title {
+        color: var(--text-dark-secondary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 2rem;
+        }
+
+        .profile-header-content {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-info h1 {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .interview-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-header-content">
+            <div class="profile-avatar">
+                {% if current_user.avatar %}
+                <img src="{{ current_user.avatar }}" alt="{{ current_user.name }}">
+                {% else %}
+                {{ current_user.initials }}
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <h1>{{ current_user.name }}</h1>
+                <div class="user-email">{{ current_user.email }}</div>
+                <div class="profile-badges">
+                    {% if current_user.oauth_provider %}
+                    <div class="profile-badge">
+                        <i class="bi bi-{{ 'google' if current_user.oauth_provider == 'google' else 'github' }}"></i>
+                        Signed in with {{ current_user.oauth_provider.title() }}
+                    </div>
+                    {% endif %}
+                    <div class="profile-badge">
+                        <i class="bi bi-calendar"></i>
+                        Member since {{ "2024" }}
+                    </div>
+                    <div class="profile-badge">
+                        <i class="bi bi-trophy"></i>
+                        {{ performance_data.total_interviews }} Interviews Completed
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-chat-square-text"></i>
+            </div>
+            <div class="stat-value">{{ performance_data.total_interviews }}</div>
+            <div class="stat-label">Total Interviews</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-question-circle"></i>
+            </div>
+            <div class="stat-value">{{ performance_data.total_questions }}</div>
+            <div class="stat-label">Questions Answered</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="stat-value">{{ performance_data.avg_questions_per_interview }}</div>
+            <div class="stat-label">Avg Questions/Interview</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-percent"></i>
+            </div>
+            <div class="stat-value">{{ performance_data.completion_rate }}%</div>
+            <div class="stat-label">Completion Rate</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="bi bi-award"></i>
+            </div>
+            <div class="stat-value">{{ performance_data.improvement_score }}%</div>
+            <div class="stat-label">Improvement Score</div>
+        </div>
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+        <!-- Interview History -->
+        <div class="content-card">
+            <div class="content-header">
+                <h3 class="content-title">
+                    <i class="bi bi-clock-history"></i>
+                    Recent Interview History
+                </h3>
+                <a href="/admin/stats" class="content-action">View All</a>
+            </div>
+
+            {% if recent_interviews %}
+            <ul class="interview-list">
+                {% for interview in recent_interviews %}
+                <li class="interview-item">
+                    <div class="interview-icon">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div class="interview-content">
+                        <div class="interview-title">{{ interview.role }} Interview</div>
+                        <div class="interview-meta">
+                            <span><i class="bi bi-tag"></i> {{ interview.level }}</span>
+                            <span><i class="bi bi-bookmark"></i> {{ interview.topic }}</span>
+                            <span><i class="bi bi-chat-dots"></i> {{ interview.answer_count }} questions</span>
+                        </div>
+                    </div>
+                    <div class="interview-score">85%</div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-chat-square-dots"></i>
+                </div>
+                <div class="empty-state-title">No interviews yet</div>
+                <p>Start your first interview practice session!</p>
+                <a href="/interview" class="btn btn-primary mt-3">Start Interview</a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Sidebar -->
+        <div>
+            <!-- Activity Chart -->
+            <div class="content-card">
+                <div class="content-header">
+                    <h3 class="content-title">
+                        <i class="bi bi-bar-chart"></i>
+                        Monthly Activity
+                    </h3>
+                </div>
+
+                <div class="activity-chart">
+                    {% for month in monthly_activity %}
+                    <div class="activity-bar">
+                        <div class="activity-bar-fill" style="height: {{ (month.interviews * 10) }}%;"></div>
+                        <div class="activity-tooltip">
+                            {{ month.month }}: {{ month.interviews }} interviews, {{ month.questions }} questions
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="activity-labels">
+                    {% for month in monthly_activity %}
+                    <span>{{ month.month }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="content-card">
+                <div class="content-header">
+                    <h3 class="content-title">
+                        <i class="bi bi-trophy"></i>
+                        Achievements
+                    </h3>
+                </div>
+
+                {% if achievements %}
+                <ul class="achievement-list">
+                    {% for achievement in achievements %}
+                    <li class="achievement-item">
+                        <div class="achievement-icon {{ achievement.type }}">
+                            <i class="bi bi-{{ achievement.icon }}"></i>
+                        </div>
+                        <div class="achievement-content">
+                            <div class="achievement-title">{{ achievement.title }}</div>
+                            <div class="achievement-desc">{{ achievement.description }}</div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-trophy"></i>
+                    </div>
+                    <div class="empty-state-title">No achievements yet</div>
+                    <p>Complete interviews to unlock achievements!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Profile page interactivity
+    document.addEventListener('DOMContentLoaded', function () {
+        // Animate activity bars
+        setTimeout(() => {
+            const activityBars = document.querySelectorAll('.activity-bar-fill');
+            activityBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.opacity = '1';
+                }, index * 100);
+            });
+        }, 500);
+
+        // Animate stat cards
+        const statCards = document.querySelectorAll('.stat-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        });
+
+        statCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+
+        // Add click handlers for interview items
+        const interviewItems = document.querySelectorAll('.interview-item');
+        interviewItems.forEach(item => {
+            item.addEventListener('click', function () {
+                // Could navigate to detailed interview view
+                console.log('Interview item clicked');
+            });
+        });
+    });
+
+    // Export profile data
+    function exportProfile() {
+        const profileData = {
+            user: {
+                name: '{{ current_user.name }}',
+                email: '{{ current_user.email }}',
+                provider: '{{ current_user.oauth_provider }}'
+            },
+            stats: {{ performance_data | tojson | safe
+    }},
+    interviews: { { recent_interviews | tojson | safe } }
+        };
+
+    const dataStr = JSON.stringify(profileData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'profile-data.json';
+    link.click();
+
+    URL.revokeObjectURL(url);
+    }
+
+    // Share profile achievements
+    function shareAchievements() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'My AI Interview Coach Progress',
+                text: `I've completed {{ performance_data.total_interviews }} interviews and answered {{ performance_data.total_questions }} questions! 🎉`,
+                url: window.location.origin
+            });
+        } else {
+            const text = `I've completed {{ performance_data.total_interviews }} interviews and answered {{ performance_data.total_questions }} questions on AI Interview Coach! 🎉 ${window.location.origin}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Achievement shared to clipboard!', 'success');
+            });
+        }
+    }
+</script>
+{% endblock %}

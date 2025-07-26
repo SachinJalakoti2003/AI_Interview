@@ -1,9 +1,28 @@
-// Camera functionality for interview practice
+// Enhanced Camera Surveillance System for AI Interview Coach
 let currentStream = null;
 let availableCameras = [];
 let currentCameraIndex = 0;
 let recordingStartTime = null;
 let timerInterval = null;
+
+// Recording functionality
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
+let recordingBlob = null;
+
+// Surveillance features
+let motionDetection = false;
+let faceDetection = false;
+let surveillanceMode = false;
+let lastFrameData = null;
+let motionThreshold = 30;
+let surveillanceLog = [];
+
+// Performance monitoring
+let frameRate = 0;
+let lastFrameTime = 0;
+let frameCount = 0;
 
 // Initialize camera functionality when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
