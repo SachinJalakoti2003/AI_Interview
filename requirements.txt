@@ -5,3 +5,6 @@ google-ai-generativelanguage
 python-dotenv
 requests        # For OAuth API calls
 gunicorn        # For deployment on platforms like Render or Railway
+PyPDF2          # For PDF resume processing
+python-docx     # For DOCX resume processing
+Werkzeug        # For secure file uploads

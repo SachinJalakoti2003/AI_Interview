@@ -8,6 +8,11 @@ from database import db
 import uuid
 import requests
 import secrets
+from werkzeug.utils import secure_filename
+import PyPDF2
+import docx
+import json
+import re
 
 load_dotenv()
 
@@ -56,13 +61,76 @@ def inject_user():
         }
     }
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def home():
     # Show welcome page if user is not authenticated
     if not session.get('is_logged_in'):
         return render_template("welcome.html")
     
-    # If authenticated, redirect to dashboard
+    if request.method == "POST":
+        # Handle question generation from the main form
+        role = request.form.get("role", "").strip()
+        level = request.form.get("level", "").strip()
+        topic = request.form.get("topic", "").strip()
+        
+        if not role:
+            return jsonify({'error': 'Job role is required'}), 400
+        
+        # Check if resume data is available
+        resume_data = None
+        if 'resume_data' in request.form:
+            try:
+                resume_data = json.loads(request.form['resume_data'])
+            except:
+                resume_data = session.get('resume_data')
+        else:
+            resume_data = session.get('resume_data')
+        
+        # Auto-fill missing fields from resume if available
+        if resume_data and resume_data.get('analysis'):
+            analysis = resume_data['analysis']
+            if not level and analysis.get('detected_level'):
+                level = analysis['detected_level']
+            if not topic and analysis.get('suggested_topic'):
+                topic = analysis['suggested_topic']
+        
+        # Validate required fields
+        if not level or not topic:
+            return jsonify({'error': 'Experience level and topic are required'}), 400
+        
+        try:
+            # Generate questions with or without resume data
+            if resume_data and resume_data.get('analysis'):
+                questions_text = generate_personalized_questions(role, level, topic, resume_data)
+            else:
+                questions_text = generate_chain.run(role=role, level=level, topic=topic)
+            
+            questions_list = [q.strip() for q in questions_text.split('\n') if q.strip()]
+            
+            # Save interview to database and get interview ID
+            interview_id = db.save_interview(role, level, topic, questions_list)
+            
+            # Store interview ID in session for later use
+            session['current_interview_id'] = interview_id
+            session['interview_data'] = {
+                'role': role,
+                'level': level,
+                'topic': topic,
+                'personalized': bool(resume_data)
+            }
+            
+            return render_template("index.html", 
+                                 questions=questions_text, 
+                                 role=role, 
+                                 level=level, 
+                                 topic=topic,
+                                 personalized=bool(resume_data))
+        
+        except Exception as e:
+            print(f"Error generating questions: {e}")
+            return jsonify({'error': f'Failed to generate questions: {str(e)}'}), 500
+    
+    # If authenticated, redirect to dashboard for GET requests
     return redirect("/dashboard")
 
 @app.route("/interview", methods=["GET", "POST"])
@@ -76,8 +144,22 @@ def interview():
         level = request.form["level"]
         topic = request.form["topic"]
         
-        # Generate questions
-        questions_text = generate_chain.run(role=role, level=level, topic=topic)
+        # Check if resume data is available
+        resume_data = None
+        if 'resume_data' in request.form:
+            try:
+                resume_data = json.loads(request.form['resume_data'])
+            except:
+                resume_data = session.get('resume_data')
+        else:
+            resume_data = session.get('resume_data')
+        
+        # Generate questions with or without resume data
+        if resume_data and resume_data.get('analysis'):
+            questions_text = generate_personalized_questions(role, level, topic, resume_data)
+        else:
+            questions_text = generate_chain.run(role=role, level=level, topic=topic)
+        
         questions_list = [q.strip() for q in questions_text.split('\n') if q.strip()]
         
         # Save interview to database and get interview ID
@@ -88,11 +170,72 @@ def interview():
         session['interview_data'] = {
             'role': role,
             'level': level,
-            'topic': topic
+            'topic': topic,
+            'personalized': bool(resume_data)
         }
         
-        return render_template("index.html", questions=questions_text, role=role, level=level, topic=topic)
+        return render_template("index.html", 
+                             questions=questions_text, 
+                             role=role, 
+                             level=level, 
+                             topic=topic,
+                             personalized=bool(resume_data))
     return render_template("index.html")
+
+def generate_personalized_questions(role, level, topic, resume_data):
+    """Generate personalized interview questions based on resume data"""
+    analysis = resume_data.get('analysis', {})
+    resume_text = resume_data.get('text', '')
+    
+    # Create personalized prompt
+    personalized_template = """
+    You are an expert interview coach. Generate 5-7 personalized interview questions for a {role} position at {level} level, focusing on {topic}.
+
+    CANDIDATE BACKGROUND:
+    - Detected Role: {detected_role}
+    - Experience Level: {detected_level} ({years_experience} years)
+    - Key Skills: {skills}
+    - Education: {education}
+    - Resume Summary: {resume_summary}
+
+    INSTRUCTIONS:
+    1. Create questions that are specifically tailored to the candidate's background
+    2. Reference their actual skills and experience when relevant
+    3. Ask about specific technologies/tools mentioned in their resume
+    4. Include behavioral questions related to their experience level
+    5. Focus on {topic} but incorporate their background
+    6. Make questions challenging but appropriate for their level
+    7. Include at least one question about a specific project or achievement from their background
+
+    Generate questions that feel personalized and relevant to this specific candidate's profile.
+    Format: Return only the questions, one per line, numbered.
+    """
+    
+    # Prepare resume data for prompt
+    skills_str = ", ".join(analysis.get('skills', [])[:5]) or "General technical skills"
+    education_str = ", ".join([str(edu) for edu in analysis.get('education', [])][:2]) or "Not specified"
+    resume_summary = resume_text[:500] + "..." if len(resume_text) > 500 else resume_text
+    
+    personalized_prompt = PromptTemplate.from_template(personalized_template)
+    personalized_chain = LLMChain(llm=llm, prompt=personalized_prompt)
+    
+    try:
+        questions_text = personalized_chain.run(
+            role=role,
+            level=level,
+            topic=topic,
+            detected_role=analysis.get('detected_role', role),
+            detected_level=analysis.get('detected_level', level),
+            years_experience=analysis.get('years_experience', 0),
+            skills=skills_str,
+            education=education_str,
+            resume_summary=resume_summary
+        )
+        return questions_text
+    except Exception as e:
+        print(f"Error generating personalized questions: {e}")
+        # Fallback to regular questions
+        return generate_chain.run(role=role, level=level, topic=topic)
 
 @app.route("/evaluate", methods=["POST"])
 def evaluate():
@@ -628,6 +771,287 @@ def profile():
                          performance_data=performance_data,
                          monthly_activity=monthly_activity,
                          achievements=achievements)
+
+# Resume Upload Configuration
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+# Create upload folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def extract_text_from_pdf(file_path):
+    """Extract text from PDF file"""
+    try:
+        with open(file_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            text = ""
+            for page in pdf_reader.pages:
+                text += page.extract_text() + "\n"
+        return text
+    except Exception as e:
+        print(f"Error extracting PDF text: {e}")
+        return None
+
+def extract_text_from_docx(file_path):
+    """Extract text from DOCX file"""
+    try:
+        doc = docx.Document(file_path)
+        text = ""
+        for paragraph in doc.paragraphs:
+            text += paragraph.text + "\n"
+        return text
+    except Exception as e:
+        print(f"Error extracting DOCX text: {e}")
+        return None
+
+def extract_text_from_doc(file_path):
+    """Extract text from DOC file (basic implementation)"""
+    try:
+        # For DOC files, we'll use a simple approach
+        # In production, you might want to use python-docx2txt or similar
+        with open(file_path, 'rb') as file:
+            content = file.read()
+            # Basic text extraction (this is very limited)
+            text = content.decode('utf-8', errors='ignore')
+            return text
+    except Exception as e:
+        print(f"Error extracting DOC text: {e}")
+        return None
+
+def analyze_resume_content(text):
+    """Analyze resume content to extract key information"""
+    if not text:
+        return {}
+    
+    text_lower = text.lower()
+    
+    # Detect potential job roles
+    role_keywords = {
+        'Data Scientist': ['data scientist', 'machine learning', 'data analysis', 'python', 'r programming', 'statistics'],
+        'Software Engineer': ['software engineer', 'developer', 'programming', 'java', 'javascript', 'python', 'c++'],
+        'Product Manager': ['product manager', 'product management', 'roadmap', 'stakeholder', 'agile', 'scrum'],
+        'DevOps Engineer': ['devops', 'cloud', 'aws', 'docker', 'kubernetes', 'ci/cd', 'infrastructure'],
+        'UI/UX Designer': ['ui/ux', 'user experience', 'design', 'figma', 'sketch', 'prototyping'],
+        'Frontend Developer': ['frontend', 'react', 'angular', 'vue', 'html', 'css', 'javascript'],
+        'Backend Developer': ['backend', 'api', 'database', 'server', 'node.js', 'django', 'flask'],
+        'Full Stack Developer': ['full stack', 'fullstack', 'frontend', 'backend', 'web development'],
+        'Marketing Manager': ['marketing', 'digital marketing', 'campaigns', 'analytics', 'seo', 'social media'],
+        'Sales Representative': ['sales', 'business development', 'client relations', 'crm', 'revenue']
+    }
+    
+    detected_role = None
+    max_matches = 0
+    
+    for role, keywords in role_keywords.items():
+        matches = sum(1 for keyword in keywords if keyword in text_lower)
+        if matches > max_matches:
+            max_matches = matches
+            detected_role = role
+    
+    # Detect experience level based on years mentioned
+    experience_patterns = [
+        r'(\d+)\+?\s*years?\s*(?:of\s*)?experience',
+        r'(\d+)\+?\s*years?\s*in',
+        r'(\d+)\+?\s*years?\s*working',
+        r'experience:\s*(\d+)\+?\s*years?'
+    ]
+    
+    years_experience = 0
+    for pattern in experience_patterns:
+        matches = re.findall(pattern, text_lower)
+        if matches:
+            years_experience = max(years_experience, int(matches[0]))
+    
+    # Determine level based on years
+    if years_experience == 0:
+        detected_level = 'Junior'
+    elif years_experience <= 2:
+        detected_level = 'Junior'
+    elif years_experience <= 5:
+        detected_level = 'Mid'
+    elif years_experience <= 10:
+        detected_level = 'Senior'
+    else:
+        detected_level = 'Lead'
+    
+    # Extract skills
+    skills = []
+    skill_patterns = [
+        r'skills?:\s*([^\n]+)',
+        r'technical skills?:\s*([^\n]+)',
+        r'programming languages?:\s*([^\n]+)',
+        r'technologies?:\s*([^\n]+)'
+    ]
+    
+    for pattern in skill_patterns:
+        matches = re.findall(pattern, text_lower)
+        for match in matches:
+            skills.extend([skill.strip() for skill in match.split(',') if skill.strip()])
+    
+    # Extract education
+    education = []
+    education_patterns = [
+        r'(bachelor|master|phd|doctorate).*?(?:in|of)\s*([^\n,]+)',
+        r'(b\.?s\.?|m\.?s\.?|ph\.?d\.?).*?(?:in|of)\s*([^\n,]+)',
+        r'education:\s*([^\n]+)'
+    ]
+    
+    for pattern in education_patterns:
+        matches = re.findall(pattern, text_lower)
+        education.extend(matches)
+    
+    # Suggest topic based on detected role and skills
+    suggested_topic = suggest_topic_from_analysis(detected_role, skills, text_lower)
+    
+    return {
+        'detected_role': detected_role,
+        'detected_level': detected_level,
+        'years_experience': years_experience,
+        'skills': skills[:10],  # Limit to top 10 skills
+        'education': education[:3],  # Limit to top 3 education entries
+        'suggested_topic': suggested_topic,
+        'text_length': len(text),
+        'analysis_confidence': min(100, max_matches * 10)  # Simple confidence score
+    }
+
+def suggest_topic_from_analysis(detected_role, skills, text_lower):
+    """Suggest interview topic based on role and skills"""
+    if not detected_role:
+        return None
+    
+    # Role-based topic mapping with skill-based refinement
+    role_topics = {
+        'Data Scientist': ['Machine Learning', 'Statistics', 'Python', 'Data Visualization', 'Deep Learning', 'SQL', 'Big Data', 'A/B Testing'],
+        'Software Engineer': ['Data Structures', 'Algorithms', 'System Design', 'OOP', 'Databases', 'JavaScript', 'React', 'API Design'],
+        'Product Manager': ['Product Strategy', 'Roadmapping', 'User Research', 'Agile', 'Stakeholder Management', 'Analytics', 'Go-to-Market'],
+        'DevOps Engineer': ['Cloud Computing', 'CI/CD', 'Containers', 'Monitoring', 'Infrastructure as Code', 'Kubernetes', 'Security'],
+        'UI/UX Designer': ['Design Principles', 'Prototyping', 'User Testing', 'Figma', 'Accessibility', 'Design Systems', 'User Research'],
+        'Frontend Developer': ['JavaScript', 'React', 'CSS', 'HTML', 'Vue.js', 'Angular', 'Responsive Design', 'Performance'],
+        'Backend Developer': ['API Design', 'Databases', 'Node.js', 'Python', 'System Architecture', 'Security', 'Microservices'],
+        'Full Stack Developer': ['JavaScript', 'React', 'Node.js', 'Databases', 'API Design', 'System Design', 'DevOps'],
+        'Marketing Manager': ['Digital Marketing', 'Analytics', 'Campaign Management', 'SEO', 'Social Media', 'Content Strategy'],
+        'Sales Representative': ['Sales Process', 'CRM', 'Lead Generation', 'Client Relations', 'Negotiation', 'Business Development']
+    }
+    
+    available_topics = role_topics.get(detected_role, [])
+    if not available_topics:
+        return None
+    
+    # Score topics based on skills mentioned in resume
+    topic_scores = {}
+    for topic in available_topics:
+        score = 0
+        topic_lower = topic.lower()
+        
+        # Check if topic is mentioned in resume
+        if topic_lower in text_lower:
+            score += 10
+        
+        # Check if related skills are mentioned
+        for skill in skills:
+            skill_lower = skill.lower()
+            if skill_lower in topic_lower or topic_lower in skill_lower:
+                score += 5
+        
+        # Boost score for common technology matches
+        tech_matches = {
+            'machine learning': ['ml', 'tensorflow', 'pytorch', 'scikit-learn'],
+            'javascript': ['js', 'node', 'react', 'vue', 'angular'],
+            'python': ['django', 'flask', 'pandas', 'numpy'],
+            'cloud computing': ['aws', 'azure', 'gcp', 'docker', 'kubernetes'],
+            'databases': ['sql', 'mysql', 'postgresql', 'mongodb', 'redis']
+        }
+        
+        for tech, keywords in tech_matches.items():
+            if tech in topic_lower:
+                for keyword in keywords:
+                    if keyword in text_lower:
+                        score += 3
+        
+        topic_scores[topic] = score
+    
+    # Return the highest scoring topic, or the first one if no scores
+    if topic_scores:
+        best_topic = max(topic_scores.items(), key=lambda x: x[1])
+        return best_topic[0] if best_topic[1] > 0 else available_topics[0]
+    
+    return available_topics[0]
+
+@app.route("/process_resume", methods=["POST"])
+def process_resume():
+    """Process uploaded resume and extract information"""
+    if not session.get('is_logged_in'):
+        return jsonify({'success': False, 'error': 'Authentication required'}), 401
+    
+    if 'resume' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+    
+    file = request.files['resume']
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No file selected'}), 400
+    
+    if not allowed_file(file.filename):
+        return jsonify({'success': False, 'error': 'Invalid file type. Please upload PDF, DOC, or DOCX files.'}), 400
+    
+    try:
+        # Save uploaded file
+        filename = secure_filename(file.filename)
+        timestamp = str(int(uuid.uuid4().int))[:8]
+        filename = f"{timestamp}_{filename}"
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+        
+        # Extract text based on file type
+        file_ext = filename.rsplit('.', 1)[1].lower()
+        
+        if file_ext == 'pdf':
+            text = extract_text_from_pdf(file_path)
+        elif file_ext == 'docx':
+            text = extract_text_from_docx(file_path)
+        elif file_ext == 'doc':
+            text = extract_text_from_doc(file_path)
+        else:
+            return jsonify({'success': False, 'error': 'Unsupported file type'}), 400
+        
+        if not text:
+            return jsonify({'success': False, 'error': 'Could not extract text from file'}), 400
+        
+        # Analyze resume content
+        analysis = analyze_resume_content(text)
+        
+        # Store resume data in session for later use
+        session['resume_data'] = {
+            'filename': file.filename,
+            'text': text[:2000],  # Store first 2000 characters
+            'analysis': analysis,
+            'upload_timestamp': timestamp
+        }
+        
+        # Clean up uploaded file
+        try:
+            os.remove(file_path)
+        except:
+            pass
+        
+        return jsonify({
+            'success': True,
+            'message': 'Resume processed successfully',
+            'resume_data': analysis,
+            'detected_role': analysis.get('detected_role'),
+            'detected_level': analysis.get('detected_level'),
+            'suggested_topic': analysis.get('suggested_topic'),
+            'skills_found': len(analysis.get('skills', [])),
+            'confidence': analysis.get('analysis_confidence', 0)
+        })
+        
+    except Exception as e:
+        print(f"Resume processing error: {e}")
+        return jsonify({'success': False, 'error': f'Processing failed: {str(e)}'}), 500
 
 @app.route("/test")
 def test_page():

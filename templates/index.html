@@ -1088,6 +1088,57 @@
         border: 1px solid rgba(220, 38, 38, 0.3);
     }
 
+    /* Camera Toast Notifications */
+    .camera-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 1rem 1.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+        z-index: 10000;
+        transform: translateX(400px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+        max-width: 350px;
+    }
+
+    body.dark .camera-toast {
+        background: var(--bg-dark-secondary);
+        color: var(--text-dark-primary);
+    }
+
+    .camera-toast.show {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    .camera-toast-success {
+        border-left-color: var(--success);
+        color: var(--success);
+    }
+
+    .camera-toast-error {
+        border-left-color: var(--danger);
+        color: var(--danger);
+    }
+
+    .camera-toast-info {
+        border-left-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .camera-toast i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
     @media (max-width: 1024px) {
         .camera-content {
             grid-template-columns: 1fr;
@@ -1115,6 +1166,416 @@
             padding: 0.875rem 1.25rem;
             font-size: 0.8rem;
         }
+    }
+
+    /* Resume Upload Styles */
+    .resume-upload-section {
+        background: var(--bg-secondary);
+        border-radius: var(--radius-2xl);
+        padding: 2.5rem;
+        border: 1px solid var(--border-light);
+        position: relative;
+        overflow: hidden;
+    }
+
+    body.dark .resume-upload-section {
+        background: var(--bg-dark-tertiary);
+        border-color: var(--border-dark);
+    }
+
+    .resume-upload-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f59e0b, var(--primary), #8b5cf6);
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+
+    body.dark .section-title {
+        color: var(--text-dark-primary);
+    }
+
+    .section-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin: 0;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    body.dark .section-subtitle {
+        color: var(--text-dark-secondary);
+    }
+
+    .resume-upload-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .upload-area {
+        border: 3px dashed var(--border-light);
+        border-radius: var(--radius-2xl);
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all var(--transition-normal);
+        cursor: pointer;
+        position: relative;
+        background: var(--bg-primary);
+    }
+
+    body.dark .upload-area {
+        border-color: var(--border-dark);
+        background: var(--bg-dark-secondary);
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary);
+        background: rgba(37, 99, 235, 0.02);
+        transform: translateY(-2px);
+    }
+
+    body.dark .upload-area:hover {
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .upload-area.dragover {
+        border-color: var(--primary);
+        background: rgba(37, 99, 235, 0.05);
+        transform: scale(1.02);
+    }
+
+    .upload-content {
+        pointer-events: none;
+    }
+
+    .upload-icon {
+        font-size: 4rem;
+        color: var(--text-tertiary);
+        margin-bottom: 1.5rem;
+        transition: all var(--transition-normal);
+    }
+
+    body.dark .upload-icon {
+        color: var(--text-dark-tertiary);
+    }
+
+    .upload-area:hover .upload-icon {
+        color: var(--primary);
+        transform: scale(1.1);
+    }
+
+    .upload-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.75rem;
+    }
+
+    body.dark .upload-title {
+        color: var(--text-dark-primary);
+    }
+
+    .upload-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin-bottom: 2rem;
+    }
+
+    body.dark .upload-subtitle {
+        color: var(--text-dark-secondary);
+    }
+
+    .upload-btn {
+        background: linear-gradient(135deg, var(--primary) 0%, #8b5cf6 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: var(--radius-xl);
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        pointer-events: auto;
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+    }
+
+    .upload-status {
+        background: var(--bg-primary);
+        border: 2px solid var(--success);
+        border-radius: var(--radius-2xl);
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    body.dark .upload-status {
+        background: var(--bg-dark-secondary);
+    }
+
+    .status-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-icon {
+        font-size: 2rem;
+        color: var(--success);
+        flex-shrink: 0;
+    }
+
+    .status-info {
+        flex: 1;
+    }
+
+    .status-filename {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    body.dark .status-filename {
+        color: var(--text-dark-primary);
+    }
+
+    .status-details {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    body.dark .status-details {
+        color: var(--text-dark-secondary);
+    }
+
+    .remove-btn {
+        background: var(--danger);
+        color: white;
+        border: none;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        flex-shrink: 0;
+    }
+
+    .remove-btn:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+    }
+
+    .upload-progress {
+        height: 8px;
+        background: var(--border-light);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        position: relative;
+    }
+
+    body.dark .upload-progress {
+        background: var(--border-dark);
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--success), #10b981);
+        border-radius: var(--radius-full);
+        transition: width 0.3s ease;
+        position: relative;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-image: linear-gradient(
+            -45deg,
+            rgba(255, 255, 255, 0.3) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0.3) 75%,
+            transparent 75%,
+            transparent
+        );
+        background-size: 1rem 1rem;
+        animation: progressStripes 1s linear infinite;
+    }
+
+    .resume-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-light);
+    }
+
+    body.dark .resume-features {
+        border-color: var(--border-dark);
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    body.dark .feature-item {
+        color: var(--text-dark-secondary);
+    }
+
+    .feature-item i {
+        color: var(--success);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+        .resume-upload-section {
+            padding: 2rem;
+        }
+
+        .upload-area {
+            padding: 2rem 1.5rem;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+        }
+
+        .upload-title {
+            font-size: 1.125rem;
+        }
+
+        .resume-features {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Auto-Fill Indicators */
+    .auto-filled-indicator {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);
+        border: 1px solid rgba(5, 150, 105, 0.3);
+        border-radius: var(--radius-xl);
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        animation: slideInDown 0.5s ease-out;
+    }
+
+    body.dark .auto-filled-indicator {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.2) 0%, rgba(37, 99, 235, 0.2) 100%);
+        border-color: rgba(5, 150, 105, 0.4);
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .indicator-content {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--success);
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+
+    body.dark .indicator-content {
+        color: #10b981;
+    }
+
+    .indicator-content i {
+        font-size: 1.125rem;
+        animation: sparkle 2s ease-in-out infinite;
+    }
+
+    @keyframes sparkle {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.1) rotate(180deg); }
+    }
+
+    .auto-detected {
+        background: rgba(5, 150, 105, 0.2);
+        color: var(--success);
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-left: 0.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    body.dark .auto-detected {
+        background: rgba(5, 150, 105, 0.3);
+        color: #10b981;
+    }
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+
+    .helper-text.success {
+        color: var(--success) !important;
+    }
+
+    body.dark .helper-text.success {
+        color: #10b981 !important;
+    }
+
+    .helper-text.success i {
+        color: var(--success);
+    }
+
+    body.dark .helper-text.success i {
+        color: #10b981;
     }
 
     @media (max-width: 480px) {
@@ -1155,6 +1616,18 @@
 
         .video-placeholder p {
             font-size: 1rem;
+        }
+
+        .resume-upload-section {
+            padding: 1.5rem;
+        }
+
+        .upload-area {
+            padding: 1.5rem 1rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
         }
     }
 </style>
@@ -1226,7 +1699,7 @@
                 </div>
                 
                 <div class="form-section">
-                    <form method="post" id="interview-form">
+                    <form method="post" action="/" id="interview-form">
                         <div class="row g-4">
                             <div class="col-md-4">
                                 <div class="form-floating">
@@ -1278,6 +1751,63 @@
                                 <div class="helper-text">
                                     <i class="bi bi-info-circle"></i>
                                     Topic updates based on role
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Resume Upload Section -->
+                        <div class="resume-upload-section mt-5">
+                            <div class="section-header">
+                                <h4 class="section-title">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Upload Your Resume (Optional)
+                                </h4>
+                                <p class="section-subtitle">Upload your resume to generate personalized interview questions based on your experience and skills</p>
+                            </div>
+                            
+                            <div class="resume-upload-container">
+                                <div class="upload-area" id="uploadArea">
+                                    <div class="upload-content">
+                                        <i class="bi bi-cloud-upload upload-icon"></i>
+                                        <h5 class="upload-title">Drop your resume here or click to browse</h5>
+                                        <p class="upload-subtitle">Supports PDF, DOC, DOCX files (Max 5MB)</p>
+                                        <input type="file" id="resumeFile" name="resume" accept=".pdf,.doc,.docx" hidden>
+                                        <button type="button" class="upload-btn" onclick="document.getElementById('resumeFile').click()">
+                                            <i class="bi bi-folder2-open"></i>
+                                            Choose File
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="upload-status" id="uploadStatus" style="display: none;">
+                                    <div class="status-content">
+                                        <i class="bi bi-file-earmark-check status-icon"></i>
+                                        <div class="status-info">
+                                            <div class="status-filename" id="statusFilename"></div>
+                                            <div class="status-details" id="statusDetails"></div>
+                                        </div>
+                                        <button type="button" class="remove-btn" onclick="removeResume()">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </div>
+                                    <div class="upload-progress" id="uploadProgress">
+                                        <div class="progress-bar" id="progressBar"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="resume-features">
+                                    <div class="feature-item">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>AI analyzes your skills and experience</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Generates role-specific questions</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        <span>Focuses on your background</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1345,15 +1875,15 @@
                             </div>
                             
                             <div class="camera-controls">
-                                <button type="button" id="startCameraBtn" class="camera-btn camera-btn-primary">
+                                <button type="button" id="startCameraBtn" class="camera-btn camera-btn-primary" onclick="startCamera()">
                                     <i class="bi bi-camera-video"></i>
                                     Start Camera
                                 </button>
-                                <button type="button" id="stopCameraBtn" class="camera-btn camera-btn-secondary" style="display: none;">
+                                <button type="button" id="stopCameraBtn" class="camera-btn camera-btn-secondary" style="display: none;" onclick="stopCamera()">
                                     <i class="bi bi-camera-video-off"></i>
                                     Stop Camera
                                 </button>
-                                <button type="button" id="toggleCameraBtn" class="camera-btn camera-btn-outline" style="display: none;">
+                                <button type="button" id="toggleCameraBtn" class="camera-btn camera-btn-outline" style="display: none;" onclick="switchCamera()">
                                     <i class="bi bi-arrow-repeat"></i>
                                     Switch Camera
                                 </button>
@@ -1430,7 +1960,550 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='camera.js') }}"></script>
+<script>
+    // Camera functionality
+    let currentStream = null;
+    let currentCamera = 0;
+    let availableCameras = [];
+    let isRecording = false;
+    let recordingStartTime = null;
+    let timerInterval = null;
+
+    // Initialize camera functionality when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCameraSystem();
+    });
+
+    async function initializeCameraSystem() {
+        try {
+            // Check if getUserMedia is supported
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                updateCameraStatus('Camera not supported in this browser', 'error');
+                document.getElementById('startCameraBtn').disabled = true;
+                return;
+            }
+
+            // Check camera permissions
+            await checkCameraPermissions();
+            
+            // Get available cameras
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            availableCameras = devices.filter(device => device.kind === 'videoinput');
+            
+            console.log('Available cameras:', availableCameras.length);
+            
+            if (availableCameras.length === 0) {
+                updateCameraStatus('No cameras found on this device', 'error');
+                document.getElementById('startCameraBtn').disabled = true;
+                return;
+            }
+            
+            // Show/hide switch camera button based on available cameras
+            const toggleBtn = document.getElementById('toggleCameraBtn');
+            if (availableCameras.length > 1) {
+                toggleBtn.style.display = 'block';
+            }
+            
+            updateCameraStatus(`${availableCameras.length} camera(s) detected - Ready to start`, 'inactive');
+        } catch (error) {
+            console.error('Error initializing camera system:', error);
+            updateCameraStatus('Camera initialization failed', 'error');
+        }
+    }
+
+    // Check camera permissions on page load
+    async function checkCameraPermissions() {
+        try {
+            const permissions = await navigator.permissions.query({ name: 'camera' });
+            
+            if (permissions.state === 'denied') {
+                updateCameraStatus('Camera permission denied. Please enable camera access in your browser settings.', 'error');
+                document.getElementById('startCameraBtn').disabled = true;
+            } else if (permissions.state === 'granted') {
+                updateCameraStatus('Camera permission granted - Ready to start', 'inactive');
+            } else {
+                updateCameraStatus('Camera ready - Permission will be requested when you start', 'inactive');
+            }
+        } catch (error) {
+            console.log('Permission API not supported, will request on camera start');
+            updateCameraStatus('Camera ready - Click "Start Camera" to begin', 'inactive');
+        }
+    }
+
+    async function startCamera() {
+        try {
+            updateCameraStatus('Starting camera...', 'inactive');
+            
+            // Request camera permissions
+            const constraints = {
+                video: {
+                    deviceId: availableCameras.length > 0 ? availableCameras[currentCamera].deviceId : undefined,
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    facingMode: 'user'
+                },
+                audio: false
+            };
+
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            
+            // Set video source
+            const video = document.getElementById('videoPreview');
+            const placeholder = document.getElementById('videoPlaceholder');
+            
+            video.srcObject = currentStream;
+            video.style.display = 'block';
+            placeholder.style.display = 'none';
+            
+            // Update UI
+            document.getElementById('startCameraBtn').style.display = 'none';
+            document.getElementById('stopCameraBtn').style.display = 'block';
+            if (availableCameras.length > 1) {
+                document.getElementById('toggleCameraBtn').style.display = 'block';
+            }
+            
+            updateCameraStatus('Camera active - Ready for interview practice', 'active');
+            
+            // Start recording timer
+            startRecordingTimer();
+            
+            // Show success toast
+            showCameraToast('Camera started successfully! 📹', 'success');
+            
+            console.log('Camera started successfully');
+
+        } catch (error) {
+            console.error('Error starting camera:', error);
+            let errorMessage = 'Failed to start camera';
+            
+            if (error.name === 'NotAllowedError') {
+                errorMessage = 'Camera permission denied. Please allow camera access and try again.';
+            } else if (error.name === 'NotFoundError') {
+                errorMessage = 'No camera found. Please connect a camera and try again.';
+            } else if (error.name === 'NotReadableError') {
+                errorMessage = 'Camera is being used by another application.';
+            }
+            
+            updateCameraStatus(errorMessage, 'error');
+            showCameraToast(errorMessage, 'error');
+        }
+    }
+
+    function stopCamera() {
+        try {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+            
+            // Reset video
+            const video = document.getElementById('videoPreview');
+            const placeholder = document.getElementById('videoPlaceholder');
+            
+            video.style.display = 'none';
+            placeholder.style.display = 'flex';
+            video.srcObject = null;
+            
+            // Update UI
+            document.getElementById('startCameraBtn').style.display = 'block';
+            document.getElementById('stopCameraBtn').style.display = 'none';
+            document.getElementById('toggleCameraBtn').style.display = 'none';
+            
+            // Stop recording timer
+            stopRecordingTimer();
+            
+            updateCameraStatus('Camera stopped', 'inactive');
+            showCameraToast('Camera stopped successfully', 'info');
+            
+            console.log('Camera stopped successfully');
+
+        } catch (error) {
+            console.error('Error stopping camera:', error);
+            updateCameraStatus('Error stopping camera', 'error');
+        }
+    }
+
+    async function switchCamera() {
+        if (availableCameras.length <= 1) return;
+        
+        try {
+            // Stop current camera
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Switch to next camera
+            currentCamera = (currentCamera + 1) % availableCameras.length;
+            
+            // Start new camera
+            await startCamera();
+            
+            showCameraToast(`Switched to: ${availableCameras[currentCamera].label || 'Camera ' + (currentCamera + 1)}`, 'success');
+            console.log('Switched to camera:', availableCameras[currentCamera].label);
+
+        } catch (error) {
+            console.error('Error switching camera:', error);
+            updateCameraStatus('Error switching camera', 'error');
+        }
+    }
+
+    function startRecordingTimer() {
+        recordingStartTime = Date.now();
+        isRecording = true;
+        
+        const timer = document.getElementById('recordingTimer');
+        timer.classList.add('active');
+        
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    function stopRecordingTimer() {
+        isRecording = false;
+        recordingStartTime = null;
+        
+        const timer = document.getElementById('recordingTimer');
+        timer.classList.remove('active');
+        
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    }
+
+    function updateTimer() {
+        if (!isRecording || !recordingStartTime) return;
+        
+        const elapsed = Date.now() - recordingStartTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        
+        const timerText = document.getElementById('timerText');
+        timerText.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function updateCameraStatus(message, type) {
+        const status = document.getElementById('cameraStatus');
+        const icon = status.querySelector('i');
+        
+        status.className = `camera-status ${type}`;
+        
+        // Update icon based on status
+        if (type === 'active') {
+            icon.className = 'bi bi-camera-video-fill';
+        } else if (type === 'error') {
+            icon.className = 'bi bi-exclamation-triangle-fill';
+        } else {
+            icon.className = 'bi bi-info-circle';
+        }
+        
+        status.innerHTML = `<i class="${icon.className}"></i> ${message}`;
+    }
+
+    // Add toast notification function for better user feedback
+    function showCameraToast(message, type = 'info') {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = `camera-toast camera-toast-${type}`;
+        toast.innerHTML = `
+            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+            <span>${message}</span>
+        `;
+        
+        // Add to page
+        document.body.appendChild(toast);
+        
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 100);
+        
+        // Remove toast after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => document.body.removeChild(toast), 300);
+        }, 3000);
+    }
+
+    // Clean up camera when page unloads
+    window.addEventListener('beforeunload', function() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+    });
+</script>
+<script>
+    // Resume Upload Functionality
+    let uploadedResumeData = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const uploadArea = document.getElementById('uploadArea');
+        const resumeFile = document.getElementById('resumeFile');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const form = document.getElementById('interview-form');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        // Click to upload
+        uploadArea.addEventListener('click', function() {
+            resumeFile.click();
+        });
+
+        // File input change
+        resumeFile.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        // Form submission with resume
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            generateQuestionsWithResume();
+        });
+    });
+
+    function handleFileUpload(file) {
+        // Validate file
+        const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (!allowedTypes.includes(file.type)) {
+            showToast('Please upload a PDF, DOC, or DOCX file', 'error');
+            return;
+        }
+
+        if (file.size > maxSize) {
+            showToast('File size must be less than 5MB', 'error');
+            return;
+        }
+
+        // Show upload status
+        showUploadStatus(file);
+        
+        // Simulate upload progress
+        simulateUploadProgress();
+
+        // Process file
+        processResumeFile(file);
+    }
+
+    function showUploadStatus(file) {
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const statusFilename = document.getElementById('statusFilename');
+        const statusDetails = document.getElementById('statusDetails');
+
+        uploadArea.style.display = 'none';
+        uploadStatus.style.display = 'block';
+        
+        statusFilename.textContent = file.name;
+        statusDetails.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB • ${file.type.includes('pdf') ? 'PDF' : 'Word'} Document`;
+    }
+
+    function simulateUploadProgress() {
+        const progressBar = document.getElementById('progressBar');
+        let progress = 0;
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+            }
+            progressBar.style.width = progress + '%';
+        }, 200);
+    }
+
+    function processResumeFile(file) {
+        const formData = new FormData();
+        formData.append('resume', file);
+
+        fetch('/process_resume', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                uploadedResumeData = data.resume_data;
+                showToast('✅ Resume processed successfully! Form fields auto-filled from your experience.', 'success');
+                
+                // Auto-fill form fields if detected from resume
+                if (data.detected_role) {
+                    document.getElementById('role').value = data.detected_role;
+                    updateTopicOptions(data.detected_role); // Update topics based on role
+                }
+                if (data.detected_level) {
+                    document.getElementById('level').value = data.detected_level;
+                }
+                if (data.suggested_topic) {
+                    // Wait for topics to load, then select suggested topic
+                    setTimeout(() => {
+                        document.getElementById('topic').value = data.suggested_topic;
+                    }, 100);
+                }
+                
+                // Make fields optional when resume is uploaded
+                makeFieldsOptionalWithResume();
+                
+                // Show auto-filled indicator
+                showAutoFilledIndicator();
+            } else {
+                showToast('Error processing resume: ' + data.error, 'error');
+                removeResume();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Failed to process resume. Please try again.', 'error');
+            removeResume();
+        });
+    }
+
+    function makeFieldsOptionalWithResume() {
+        const levelField = document.getElementById('level');
+        const topicField = document.getElementById('topic');
+        const roleField = document.getElementById('role');
+        
+        // Remove required attribute since resume provides this info
+        levelField.removeAttribute('required');
+        topicField.removeAttribute('required');
+        
+        // Update labels to show they're auto-detected
+        const levelLabel = levelField.closest('.form-floating').querySelector('label');
+        const topicLabel = topicField.closest('.form-floating').querySelector('label');
+        const roleLabel = roleField.closest('.form-floating').querySelector('label');
+        
+        levelLabel.innerHTML = '<i class="bi bi-ladder me-2"></i>Experience Level <span class="auto-detected">Auto-detected</span>';
+        topicLabel.innerHTML = '<i class="bi bi-tags me-2"></i>Interview Topic <span class="auto-detected">Auto-suggested</span>';
+        roleLabel.innerHTML = '<i class="bi bi-briefcase me-2"></i>Job Role <span class="auto-detected">Auto-detected</span>';
+        
+        // Update helper text
+        const levelHelper = levelField.closest('.col-md-4').querySelector('.helper-text');
+        const topicHelper = topicField.closest('.col-md-4').querySelector('.helper-text');
+        const roleHelper = roleField.closest('.col-md-4').querySelector('.helper-text');
+        
+        levelHelper.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Detected from your resume';
+        topicHelper.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Suggested based on your skills';
+        roleHelper.innerHTML = '<i class="bi bi-check-circle-fill text-success"></i> Detected from your resume';
+    }
+
+    function showAutoFilledIndicator() {
+        const formSection = document.querySelector('.form-section');
+        
+        // Add auto-filled indicator
+        const indicator = document.createElement('div');
+        indicator.className = 'auto-filled-indicator';
+        indicator.innerHTML = `
+            <div class="indicator-content">
+                <i class="bi bi-magic"></i>
+                <span>Form auto-filled from your resume! You can modify any field if needed.</span>
+            </div>
+        `;
+        
+        formSection.insertBefore(indicator, formSection.querySelector('.row'));
+    }
+
+    function removeResume() {
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const resumeFile = document.getElementById('resumeFile');
+        
+        uploadArea.style.display = 'block';
+        uploadStatus.style.display = 'none';
+        resumeFile.value = '';
+        uploadedResumeData = null;
+        
+        showToast('Resume removed', 'info');
+    }
+
+    function generateQuestionsWithResume() {
+        const role = document.getElementById('role').value;
+        const level = document.getElementById('level').value;
+        const topic = document.getElementById('topic').value;
+        const generateBtn = document.getElementById('generate-btn');
+        const loadingSpinner = document.getElementById('loading-spinner');
+
+        // If resume is uploaded, only role is required (level and topic can be auto-detected)
+        if (uploadedResumeData) {
+            if (!role) {
+                showToast('Please enter or confirm the job role', 'error');
+                return;
+            }
+            // Auto-fill missing fields from resume data if available
+            if (!level && uploadedResumeData.detected_level) {
+                document.getElementById('level').value = uploadedResumeData.detected_level;
+            }
+            if (!topic && uploadedResumeData.suggested_topic) {
+                document.getElementById('topic').value = uploadedResumeData.suggested_topic;
+            }
+        } else {
+            // Without resume, all fields are required
+            if (!role || !level || !topic) {
+                showToast('Please fill in all required fields or upload your resume for auto-detection', 'error');
+                return;
+            }
+        }
+
+        // Show loading state
+        generateBtn.disabled = true;
+        loadingSpinner.style.display = 'inline-block';
+        generateBtn.innerHTML = '<div class="loading-spinner"></div> Generating Personalized Questions...';
+
+        // Prepare form data
+        const formData = new FormData();
+        formData.append('role', role);
+        formData.append('level', level);
+        formData.append('topic', topic);
+        
+        if (uploadedResumeData) {
+            formData.append('resume_data', JSON.stringify(uploadedResumeData));
+        }
+
+        // Submit to backend
+        fetch('/', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            throw new Error('Failed to generate questions');
+        })
+        .then(html => {
+            // Replace page content with new HTML
+            document.open();
+            document.write(html);
+            document.close();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Failed to generate questions. Please try again.', 'error');
+            
+            // Reset button
+            generateBtn.disabled = false;
+            loadingSpinner.style.display = 'none';
+            generateBtn.innerHTML = '<i class="bi bi-magic"></i> Generate Questions';
+        });
+    }
+</script>
 <script>
     // Role-Topic mapping with comprehensive options
     const roleTopics = {
